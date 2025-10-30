@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Admin from './pages/Admin.jsx'
 import Cashier from './pages/Cashier.jsx'
+import Profile from './pages/Profile.jsx'
 
 const brand = {
   primary: '#3da9fc', // azul claro
@@ -47,6 +48,7 @@ export default function App() {
     [
       { to: '/', label: 'Inicio' },
       { to: '/login', label: auth.session?.user ? `${auth.session.user.name} (${role})` : 'Iniciar sesión' },
+      ...(role === 'CLIENTE' ? [{ to: '/profile', label: 'Mi Perfil' }] : []),
       ...(role === 'ADM' ? [{ to: '/admin', label: 'Admin' }] : []),
       ...(role === 'CAJERO' ? [{ to: '/caja', label: 'Cajero' }] : [])
     ]
@@ -86,6 +88,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/login" element={<Login onLogin={auth.login} />} />
           <Route path="/register" element={<Register onLogin={auth.login} />} />
+          <Route path="/profile" element={role === 'CLIENTE' ? <Profile /> : <Dashboard />} />
           <Route path="/admin" element={role === 'ADM' ? <Admin /> : <Dashboard />} />
           <Route path="/caja" element={role === 'CAJERO' ? <Cashier /> : <Dashboard />} />
         </Routes>

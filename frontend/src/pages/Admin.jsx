@@ -1,36 +1,41 @@
-import React, { useEffect, useState } from 'react'
-import { Api } from '../api'
+import React, { useState } from 'react'
+import Airlines from './admin/Airlines.jsx'
+import Cashiers from './admin/Cashiers.jsx'
+import Metrics from './admin/Metrics.jsx'
 
 export default function Admin(){
-  const [summary, setSummary] = useState(null)
+  const [activeTab, setActiveTab] = useState('metrics')
 
-  useEffect(() => {
-    Api.adminSummary().then(setSummary).catch(() => setSummary(null))
-  }, [])
-
-  if (!summary) return <div className="card">Cargando...</div>
+  const tabs = [
+    { id: 'metrics', label: 'Métricas' },
+    { id: 'airlines', label: 'Aerolíneas' },
+    { id: 'cashiers', label: 'Cajeros' }
+  ]
 
   return (
-    <div className="grid" style={{ gap: 12 }}>
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>Resumen</h3>
-        <div>Vuelos: <b>{summary.flightsCount}</b></div>
-        <div>Ciudades: <b>{summary.citiesCount}</b></div>
-      </div>
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>Usuarios (demo)</h3>
-        <div className="results">
-          {summary.users.map(u => (
-            <div key={u.id} className="card" style={{ display: 'grid', gridTemplateColumns: '1fr auto' }}>
-              <div>
-                <div style={{ fontWeight: 700 }}>{u.name}</div>
-                <div style={{ color: '#64748b', fontSize: 14 }}>{u.email}</div>
-              </div>
-              <div><span className="tag">{u.role}</span></div>
-            </div>
+    <div>
+      <div style={{ borderBottom: '2px solid var(--muted)', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={activeTab === tab.id ? 'btn-primary' : 'btn-outline'}
+              style={{ 
+                borderBottom: activeTab === tab.id ? '3px solid var(--primary)' : 'none',
+                borderRadius: '8px 8px 0 0',
+                marginBottom: '-2px'
+              }}
+            >
+              {tab.label}
+            </button>
           ))}
         </div>
       </div>
+
+      {activeTab === 'metrics' && <Metrics />}
+      {activeTab === 'airlines' && <Airlines />}
+      {activeTab === 'cashiers' && <Cashiers />}
     </div>
   )
 }

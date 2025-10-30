@@ -37,7 +37,9 @@ export default function Login({ onLogin }){
           <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" />
         </div>
         {error && <div style={{ color: '#dc2626', fontSize: 14 }}>{error}</div>}
-        <button className="btn" disabled={loading}>{loading ? 'Entrando...' :-kind 'Entrar'}</button>
+        <button className="btn" disabled={loading}>
+          {loading ? 'Entrando...' : 'Entrar'}
+        </button>
         <div style={{ textAlign: 'center', marginTop: '16px', fontSize: 14, color: 'var(--text-light)' }}>
           ¿No tienes cuenta? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>Regístrate</Link>
         </div>

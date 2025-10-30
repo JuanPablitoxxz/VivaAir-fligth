@@ -85,15 +85,36 @@ export default function Airlines() {
 
       if (error) throw error
 
-      // Simular envío de email (llamar a API endpoint que ejecutará Python script)
-      await fetch('/api/send-airline-request-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_name: formData.company_name,
-          company_email: formData.company_email
+      // Enviar email (llamar a API endpoint)
+      try {
+        const emailRes = await fetch('/api/send-airline-request-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            company_name: formData.company_name,
+            company_email: formData.company_email
+          })
         })
-      })
+        
+        if (!emailRes.ok) {
+          const text = await emailRes.text()
+          console.error('Error response:', text)
+          try {
+            const emailData = JSON.parse(text)
+            if (emailData.note) console.warn(emailData.note)
+          } catch {
+            console.warn('Respuesta no es JSON válido:', text.substring(0, 100))
+          }
+        } else {
+          const emailData = await emailRes.json()
+          if (emailData.note) {
+            console.warn(emailData.note)
+          }
+        }
+      } catch (emailErr) {
+        console.error('Error enviando email:', emailErr)
+        // Continuar aunque el email falle - no es crítico
+      }
 
       alert('Solicitud enviada. Se ha notificado al analista y a la empresa.')
       setFormData({ company_name: '', company_email: '', certificate: null })
@@ -136,13 +157,25 @@ export default function Airlines() {
           })
         })
         
-        const emailData = await emailRes.json()
-        if (emailData.note) {
-          console.warn(emailData.note)
+        if (!emailRes.ok) {
+          // Si la respuesta no es OK, intentar leer como texto primero
+          const text = await emailRes.text()
+          console.error('Error response:', text)
+          try {
+            const emailData = JSON.parse(text)
+            if (emailData.note) console.warn(emailData.note)
+          } catch {
+            console.warn('Respuesta no es JSON válido:', text.substring(0, 100))
+          }
+        } else {
+          const emailData = await emailRes.json()
+          if (emailData.note) {
+            console.warn(emailData.note)
+          }
         }
       } catch (emailErr) {
         console.error('Error enviando email:', emailErr)
-        // Continuar aunque el email falle
+        // Continuar aunque el email falle - no es crítico
       }
 
       loadAirlines()

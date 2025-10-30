@@ -46,11 +46,11 @@ export default function App() {
   const navItems = useMemo(() => (
     [
       { to: '/', label: 'Inicio' },
-      { to: '/login', label: role ? `Sesión (${role})` : 'Iniciar sesión' },
+      { to: '/login', label: auth.session?.user ? `${auth.session.user.name} (${role})` : 'Iniciar sesión' },
       ...(role === 'ADM' ? [{ to: '/admin', label: 'Admin' }] : []),
       ...(role === 'CAJERO' ? [{ to: '/caja', label: 'Cajero' }] : [])
     ]
-  ), [role])
+  ), [role, auth.session])
 
   return (
     <div className="app-container" style={{ background: brand.bg, color: brand.text }}>
@@ -64,6 +64,13 @@ export default function App() {
               key={item.to}
               to={item.to}
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              style={auth.session?.user && item.to === '/login' ? { 
+                background: 'var(--primary-light)', 
+                color: 'var(--primary-dark)',
+                fontWeight: 600,
+                cursor: 'default',
+                pointerEvents: 'none'
+              } : {}}
             >
               {item.label}
             </NavLink>

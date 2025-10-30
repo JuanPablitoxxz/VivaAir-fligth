@@ -29,7 +29,8 @@ export default async function handler(req, res) {
 
     // Enviar email real usando nodemailer
     try {
-      const nodemailer = require('nodemailer')
+      // Usar import dinámico para compatibilidad con ES modules
+      const nodemailer = (await import('nodemailer')).default
       
       const transporter = nodemailer.createTransport({
         host: smtpServer,

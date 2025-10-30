@@ -29,7 +29,8 @@ export default async function handler(req, res) {
 
     // Enviar emails reales
     try {
-      const nodemailer = require('nodemailer')
+      // Usar import dinámico para compatibilidad con ES modules
+      const nodemailer = (await import('nodemailer')).default
       
       const transporter = nodemailer.createTransport({
         host: smtpServer,
@@ -123,6 +124,10 @@ Fecha: ${new Date().toLocaleString('es-CO')}
     }
   } catch (error) {
     console.error('Email error:', error)
-    return res.json({ success: false, message: error.message })
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Error desconocido al procesar email',
+      error: error.toString()
+    })
   }
 }

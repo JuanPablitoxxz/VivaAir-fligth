@@ -6,6 +6,7 @@ import Register from './pages/Register.jsx'
 import Admin from './pages/Admin.jsx'
 import Cashier from './pages/Cashier.jsx'
 import Profile from './pages/Profile.jsx'
+import Checkout from './pages/Checkout.jsx'
 
 const brand = {
   primary: '#3da9fc', // azul claro
@@ -89,6 +90,7 @@ export default function App() {
           <Route path="/login" element={<Login onLogin={auth.login} />} />
           <Route path="/register" element={<Register onLogin={auth.login} />} />
           <Route path="/profile" element={role === 'CLIENTE' ? <Profile /> : <Dashboard />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={role === 'ADM' ? <Admin /> : <Dashboard />} />
           <Route path="/caja" element={role === 'CAJERO' ? <Cashier /> : <Dashboard />} />
         </Routes>

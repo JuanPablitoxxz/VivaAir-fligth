@@ -8,6 +8,10 @@ import FlightTypeCard from '../components/FlightTypeCard.jsx'
 
 export default function Dashboard(){
   const [results, setResults] = useState(null)
+  const [session, setSession] = useState(() => {
+    const raw = localStorage.getItem('vivaair.session')
+    return raw ? JSON.parse(raw) : null
+  })
   const navigate = useNavigate()
 
   const popularDestinations = ['Cartagena', 'Medellín', 'Cali', 'Santa Marta', 'Barranquilla']
@@ -38,7 +42,22 @@ export default function Dashboard(){
             </div>
             <div className="results">
               {results.length > 0 ? (
-                results.map(f => <FlightCard key={f.id} flight={f} variant="list" />)
+                results.map(f => (
+                  <FlightCard 
+                    key={f.id} 
+                    flight={f} 
+                    variant="list"
+                    onSelect={(flight) => {
+                      if (!session) {
+                        if (confirm('Debes iniciar sesión para comprar un vuelo. ¿Deseas ir al login?')) {
+                          navigate('/login')
+                        }
+                      } else {
+                        navigate('/checkout', { state: { flight } })
+                      }
+                    }}
+                  />
+                ))
               ) : (
                 <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
                   <p style={{ fontSize: '18px', color: 'var(--text-light)' }}>No se encontraron vuelos para tu búsqueda</p>

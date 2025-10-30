@@ -91,7 +91,7 @@ export default function FlightCard({ flight, variant = 'destination' }){
         <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary-dark)', marginBottom: 12 }}>
           {formatCOP(flight.totalPriceCOP ?? flight.priceCOP)}
         </div>
-        <button className="btn">Seleccionar</button>
+        <button className="btn" onClick={() => onSelect && onSelect(flight)}>Seleccionar</button>
       </div>
     </div>
   )

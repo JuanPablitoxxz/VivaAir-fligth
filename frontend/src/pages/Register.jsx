@@ -83,6 +83,7 @@ export default function Register({ onLogin }){
             value={formData.confirmPassword} 
             onChange={e => update('confirmPassword', e.target.value)}
             placeholder="Repite la contraseña"
+            autoComplete="new-password"
             required
             minLength={6}
           />

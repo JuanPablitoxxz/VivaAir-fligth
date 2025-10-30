@@ -14,13 +14,14 @@ export const Api = {
   async login(email, password) {
     try {
       const hashed = await hashPassword(password)
+      console.log('Login attempt:', { email, hashLength: hashed.length, hashStart: hashed.substring(0, 10) })
       
       // Primero buscar el usuario por email
       const { data, error } = await supabase
         .from('users')
         .select('id, email, role, name, password_hash')
         .eq('email', email)
-        .single()
+        .maybeSingle()
       
       if (error) {
         console.error('Supabase error:', error)
@@ -28,14 +29,23 @@ export const Api = {
       }
       
       if (!data) {
+        console.error('Usuario no encontrado:', email)
         throw new Error('Usuario no encontrado')
       }
       
+      console.log('User found:', { email: data.email, storedHashStart: data.password_hash?.substring(0, 10) })
+      
       // Comparar hashes
-      if (data.password_hash !== hashed) {
-        console.error('Password hash mismatch')
+      if (!data.password_hash || data.password_hash !== hashed) {
+        console.error('Password hash mismatch', {
+          stored: data.password_hash?.substring(0, 20),
+          received: hashed.substring(0, 20),
+          match: data.password_hash === hashed
+        })
         throw new Error('Contraseña incorrecta')
       }
+      
+      console.log('Login successful!')
       
       // Generar token
       const token = btoa(`${data.id}:${data.role}`)

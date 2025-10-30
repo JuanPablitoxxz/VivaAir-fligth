@@ -18,7 +18,8 @@ export default function Login({ onLogin }){
       onLogin(res)
       navigate('/')
     } catch (err) {
-      setError('Credenciales inválidas')
+      console.error('Login error details:', err)
+      setError(err.message || 'Credenciales inválidas')
     } finally {
       setLoading(false)
     }
@@ -30,11 +31,27 @@ export default function Login({ onLogin }){
       <form onSubmit={submit} className="grid" style={{ gap: 10 }}>
         <div>
           <div className="label">Correo</div>
-          <input className="input" value={email} onChange={e => setEmail(e.target.value)} placeholder="correo@dominio.com" />
+          <input 
+            className="input" 
+            type="email"
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            placeholder="correo@dominio.com"
+            autoComplete="email"
+            required
+          />
         </div>
         <div>
           <div className="label">Contraseña</div>
-          <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" />
+          <input 
+            className="input" 
+            type="password" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            placeholder="••••••"
+            autoComplete="current-password"
+            required
+          />
         </div>
         {error && <div style={{ color: '#dc2626', fontSize: 14 }}>{error}</div>}
         <button className="btn" disabled={loading}>

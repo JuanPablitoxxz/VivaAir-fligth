@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const flightTypes = {
   economico: {
@@ -59,8 +60,9 @@ const flightTypes = {
   }
 }
 
-export default function FlightTypeCard({ type }) {
+export default function FlightTypeCard({ type, onSearchFlights }) {
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
   const info = flightTypes[type]
 
   return (
@@ -102,17 +104,47 @@ export default function FlightTypeCard({ type }) {
         <div style={{ fontSize: '18px', fontWeight: 700, color: info.color, marginTop: '16px' }}>
           {info.price}
         </div>
-        <button 
-          className="btn-outline" 
-          style={{ 
-            marginTop: '16px', 
-            width: '100%',
-            borderColor: info.color,
-            color: info.color
-          }}
-        >
-          Ver detalles →
-        </button>
+            <button
+              className="btn-outline"
+              style={{
+                marginTop: '16px',
+                width: '100%',
+                borderColor: info.color,
+                color: info.color
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsOpen(true)
+              }}
+            >
+              Ver detalles →
+            </button>
+            <button
+              className="btn"
+              style={{
+                marginTop: '12px',
+                width: '100%',
+                background: info.color,
+                color: 'white'
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onSearchFlights) {
+                  onSearchFlights(type)
+                } else {
+                  navigate('/results', { 
+                    state: { 
+                      searchParams: { 
+                        category: type,
+                        passengers: 1 
+                      } 
+                    } 
+                  })
+                }
+              }}
+            >
+              Buscar vuelos {info.name}
+            </button>
       </div>
 
       {isOpen && (
@@ -169,14 +201,28 @@ export default function FlightTypeCard({ type }) {
               <div style={{ fontSize: '24px', fontWeight: 800, color: info.color }}>
                 {info.price}
               </div>
-              <button 
+                  <button 
                 className="btn" 
                 style={{ 
                   marginTop: '16px',
                   background: info.color,
                   minWidth: '200px'
                 }}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false)
+                  if (onSearchFlights) {
+                    onSearchFlights(type)
+                  } else {
+                    navigate('/results', { 
+                      state: { 
+                        searchParams: { 
+                          category: type,
+                          passengers: 1 
+                        } 
+                      } 
+                    })
+                  }
+                }}
               >
                 Buscar vuelos {info.name}
               </button>

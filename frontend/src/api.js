@@ -120,6 +120,12 @@ export const Api = {
     if (params.date) {
       query = query.eq('date', params.date)
     }
+    if (params.category) {
+      query = query.eq('category', params.category)
+    }
+    
+    // Solo vuelos futuros
+    query = query.gte('date', new Date().toISOString().split('T')[0])
     
     const { data, error } = await query
     

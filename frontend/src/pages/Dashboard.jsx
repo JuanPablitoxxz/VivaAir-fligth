@@ -16,10 +16,27 @@ export default function Dashboard(){
 
   const popularDestinations = ['Cartagena', 'Medellín', 'Cali', 'Santa Marta', 'Barranquilla']
   const handleDestinationClick = (city) => {
-    setResults(null)
-    // Simular búsqueda por destino
-    Api.searchFlights({ to: city }).then(setResults).catch(() => setResults([]))
-    window.scrollTo({ top: 600, behavior: 'smooth' })
+    // Navegar a página de resultados con comparación
+    navigate('/results', { 
+      state: { 
+        searchParams: { 
+          to: city,
+          passengers: 1 
+        } 
+      } 
+    })
+  }
+  
+  const handleFlightTypeClick = (category) => {
+    // Navegar a página de resultados filtrando por tipo de vuelo
+    navigate('/results', { 
+      state: { 
+        searchParams: { 
+          category: category,
+          passengers: 1 
+        } 
+      } 
+    })
   }
 
   return (
@@ -89,10 +106,23 @@ export default function Dashboard(){
               <p className="section-subtitle">Elige la opción que mejor se adapte a tus necesidades</p>
               <div className="scroll-container">
                 <div className="scroll-content">
-                  <FlightTypeCard type="economico" />
-                  <FlightTypeCard type="normal" />
-                  <FlightTypeCard type="preferencial" />
-                  <FlightTypeCard type="premium" />
+                  <FlightTypeCard type="economico" onSearchFlights={handleFlightTypeClick} />
+                  <FlightTypeCard type="normal" onSearchFlights={handleFlightTypeClick} />
+                  <FlightTypeCard type="preferencial" onSearchFlights={handleFlightTypeClick} />
+                  <FlightTypeCard type="premium" onSearchFlights={handleFlightTypeClick} />
+                </div>
+              </div>
+            </section>
+
+            <section style={{ marginTop: '60px' }}>
+              <h2 className="section-title">Tipos de vuelo</h2>
+              <p className="section-subtitle">Elige la opción que mejor se adapte a tus necesidades</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  <FlightTypeCard type="economico" onSearchFlights={handleFlightTypeClick} />
+                  <FlightTypeCard type="normal" onSearchFlights={handleFlightTypeClick} />
+                  <FlightTypeCard type="preferencial" onSearchFlights={handleFlightTypeClick} />
+                  <FlightTypeCard type="premium" onSearchFlights={handleFlightTypeClick} />
                 </div>
               </div>
             </section>

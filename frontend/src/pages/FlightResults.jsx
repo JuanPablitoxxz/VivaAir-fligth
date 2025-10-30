@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Api } from '../api'
+import { supabase } from '../lib/supabase'
 import FlightComparison from '../components/FlightComparison.jsx'
 import FlightCard from '../components/FlightCard.jsx'
 import SearchBar from '../components/SearchBar.jsx'
@@ -138,7 +139,13 @@ export default function FlightResults() {
             ← Nueva búsqueda
           </button>
           <span style={{ color: 'var(--text-light)' }}>
-            {searchParams.from} → {searchParams.to}
+            {searchParams.category ? (
+              <>Vuelos {searchParams.category[0].toUpperCase() + searchParams.category.slice(1)}</>
+            ) : searchParams.to ? (
+              <>Destino: {searchParams.to}</>
+            ) : (
+              <>{searchParams.from || 'Origen'} → {searchParams.to || 'Destino'}</>
+            )}
           </span>
         </div>
       </div>

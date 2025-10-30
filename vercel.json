@@ -11,7 +11,7 @@
   ],
   "env": {},
   "github": { "silent": true },
-  "installCommand": "npm --prefix frontend ci || npm --prefix frontend install",
+  "installCommand": "npm --prefix frontend install --include=dev",
   "buildCommand": "npm --prefix frontend run build",
   "outputDirectory": "frontend/dist"
 }

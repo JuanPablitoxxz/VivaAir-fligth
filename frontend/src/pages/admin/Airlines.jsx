@@ -17,13 +17,33 @@ export default function Airlines() {
   }, [])
 
   const loadAirlines = async () => {
-    const { data } = await supabase.from('airlines').select('*').order('name')
-    setAirlines(data || [])
+    try {
+      const { data, error } = await supabase.from('airlines').select('*').order('name')
+      if (error) {
+        console.error('Error loading airlines:', error)
+        setAirlines([])
+      } else {
+        setAirlines(data || [])
+      }
+    } catch (err) {
+      console.error('Error loading airlines:', err)
+      setAirlines([])
+    }
   }
 
   const loadRequests = async () => {
-    const { data } = await supabase.from('airline_requests').select('*').order('created_at', { ascending: false })
-    setRequests(data || [])
+    try {
+      const { data, error } = await supabase.from('airline_requests').select('*').order('created_at', { ascending: false })
+      if (error) {
+        console.error('Error loading requests:', error)
+        setRequests([])
+      } else {
+        setRequests(data || [])
+      }
+    } catch (err) {
+      console.error('Error loading requests:', err)
+      setRequests([])
+    }
   }
 
   const handleFileUpload = async (file) => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Link, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Route, Routes, useNavigate, Navigate } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
@@ -89,10 +89,10 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/login" element={<Login onLogin={auth.login} />} />
           <Route path="/register" element={<Register onLogin={auth.login} />} />
-          <Route path="/profile" element={role === 'CLIENTE' ? <Profile /> : <Dashboard />} />
+          <Route path="/profile" element={role === 'CLIENTE' ? <Profile /> : <Navigate to="/login" />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin" element={role === 'ADM' ? <Admin /> : <Dashboard />} />
-          <Route path="/caja" element={role === 'CAJERO' ? <Cashier /> : <Dashboard />} />
+          <Route path="/admin" element={role === 'ADM' ? <Admin /> : <Navigate to="/login" />} />
+          <Route path="/caja" element={role === 'CAJERO' ? <Cashier /> : <Navigate to="/login" />} />
         </Routes>
       </main>
 

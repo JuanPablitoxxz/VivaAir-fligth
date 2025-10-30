@@ -12,12 +12,22 @@ export default function Cashiers() {
   }, [])
 
   const loadCashiers = async () => {
-    const { data } = await supabase
-      .from('users')
-      .select('*')
-      .eq('role', 'CAJERO')
-      .order('name')
-    setCashiers(data || [])
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'CAJERO')
+        .order('name')
+      if (error) {
+        console.error('Error loading cashiers:', error)
+        setCashiers([])
+      } else {
+        setCashiers(data || [])
+      }
+    } catch (err) {
+      console.error('Error loading cashiers:', err)
+      setCashiers([])
+    }
   }
 
   const handleSubmit = async (e) => {

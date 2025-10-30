@@ -15,23 +15,28 @@ export default function Metrics() {
   }, [])
 
   const loadMetrics = async () => {
-    const [usersRes, flightsRes, reservationsRes, airlinesRes, revenueRes] = await Promise.all([
-      supabase.from('users').select('id', { count: 'exact', head: true }),
-      supabase.from('flights').select('id', { count: 'exact', head: true }),
-      supabase.from('reservations').select('id', { count: 'exact', head: true }),
-      supabase.from('airlines').select('id').eq('status', 'activa'),
-      supabase.from('payments').select('amount').eq('status', 'completado')
-    ])
+    try {
+      const [usersRes, flightsRes, reservationsRes, airlinesRes, revenueRes] = await Promise.all([
+        supabase.from('users').select('id', { count: 'exact', head: true }),
+        supabase.from('flights').select('id', { count: 'exact', head: true }),
+        supabase.from('reservations').select('id', { count: 'exact', head: true }),
+        supabase.from('airlines').select('id').eq('status', 'activa').catch(() => ({ data: [] })),
+        supabase.from('payments').select('amount').eq('status', 'completado').catch(() => ({ data: [] }))
+      ])
 
-    const revenue = revenueRes.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+      const revenue = revenueRes.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
 
-    setStats({
-      totalUsers: usersRes.count || 0,
-      totalFlights: flightsRes.count || 0,
-      totalReservations: reservationsRes.count || 0,
-      activeAirlines: airlinesRes.data?.length || 0,
-      totalRevenue: revenue
-    })
+      setStats({
+        totalUsers: usersRes.count || 0,
+        totalFlights: flightsRes.count || 0,
+        totalReservations: reservationsRes.count || 0,
+        activeAirlines: airlinesRes.data?.length || 0,
+        totalRevenue: revenue
+      })
+    } catch (err) {
+      console.error('Error loading metrics:', err)
+      // Si hay error, mostrar 0s pero seguir mostrando la página
+    }
   }
 
   return (

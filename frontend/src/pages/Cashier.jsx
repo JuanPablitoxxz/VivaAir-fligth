@@ -53,7 +53,7 @@ export default function Cashier(){
           passengers: 1,
           total_price: selectedFlight.totalPriceCOP || selectedFlight.priceCOP,
           status: 'confirmada',
-          ticket_number: `VA-${Date.now()}-${Math.random().toString(36).substr(2焦点, 8).toUpperCase()}`
+          ticket_number: `VA-${Date.now()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`
         }])
         .select()
         .single()

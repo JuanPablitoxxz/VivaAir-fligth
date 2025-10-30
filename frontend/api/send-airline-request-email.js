@@ -1,9 +1,5 @@
-// Serverless function para Vercel que ejecuta el script de Python
-import { exec } from 'child_process'
-import { promisify } from 'util'
-
-const execAsync = promisify(exec)
-
+// Serverless function para Vercel
+// En Vercel, las funciones serverless de Node.js usan este formato
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
@@ -12,16 +8,18 @@ export default async function handler(req, res) {
   try {
     const { company_name, company_email } = req.body
     
-    // Ejecutar script de Python (requiere que el script esté en el mismo repo)
-    const { stdout, stderr } = await execAsync(
-      `python3 scripts/send_email.py request "${company_name}" "${company_email}"`
-    )
+    // Simular envío de email (en producción usar un servicio como SendGrid)
+    console.log(`[Email Simulado] Solicitud de aerolínea de ${company_name} (${company_email})`)
     
-    return res.json({ success: true, message: stdout })
+    // En producción, aquí se haría la llamada real al servicio de email
+    // Por ahora solo logueamos para evitar errores en Vercel
+    
+    return res.json({ 
+      success: true, 
+      message: `Email simulado enviado a ${company_email}` 
+    })
   } catch (error) {
     console.error('Email error:', error)
-    // No fallar si el email no se envía (en desarrollo)
     return res.json({ success: false, message: error.message })
   }
 }
-

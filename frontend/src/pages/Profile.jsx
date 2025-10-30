@@ -46,10 +46,10 @@ Fecha de Emisión: ${new Date(reservation.created_at).toLocaleDateString('es-CO'
 Pasajero: ${session.user.name}
 Email: ${session.user.email}
 
-Vuelo: ${reservation.flights.from_city} → ${reservation.flights.to_city}
-Fecha: ${reservation.flights.date}
-Hora: ${reservation.flights.time}
-Aerolínea: ${reservation.flights.airline}
+Vuelo: ${reservation.flights?.from_city || 'N/A'} → ${reservation.flights?.to_city || 'N/A'}
+Fecha: ${reservation.flights?.date || 'N/A'}
+Hora: ${reservation.flights?.time || 'N/A'}
+Aerolínea: ${reservation.flights?.airline || 'N/A'}
 Pasajeros: ${reservation.passengers}
 
 Total Pagado: $${reservation.total_price.toLocaleString('es-CO')} COP

@@ -124,7 +124,7 @@ export default function Airlines() {
   return (
     <div className="grid" style={{ gap: '24px' }}>
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems.ui: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ margin: 0 }}>Gestión de Aerolíneas</h2>
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
             {showForm ? 'Cancelar' : '+ Nueva Solicitud'}

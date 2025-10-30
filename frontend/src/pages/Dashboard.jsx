@@ -30,7 +30,7 @@ export default function Dashboard(){
       </div>
 
       <div style={{ background: 'var(--bg-light)', paddingBottom: '40px' }}>
-        <SearchBar onResults={setResults} />
+        <SearchBar onResults={setResults} showResultsInline={true} />
 
         {results ? (
           <section style={{ padding: '0 24px', marginTop: '60px' }}>

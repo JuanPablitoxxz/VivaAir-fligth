@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Api } from '../api'
 
-export default function SearchBar({ onResults }) {
+export default function SearchBar({ onResults, showResultsInline = false }) {
+  const navigate = useNavigate()
   const [cities, setCities] = useState([])
   const [params, setParams] = useState({ from: '', to: '', date: '', passengers: 1 })
   const [loading, setLoading] = useState(false)
@@ -13,11 +15,25 @@ export default function SearchBar({ onResults }) {
   const update = (key, value) => setParams(p => ({ ...p, [key]: value }))
 
   const search = async () => {
+    if (!params.from || !params.to) {
+      alert('Por favor selecciona origen y destino')
+      return
+    }
+    
     setLoading(true)
     try {
-      const res = await Api.searchFlights(params)
-      onResults(res)
-      window.scrollTo({ top: 600, behavior: 'smooth' })
+      if (showResultsInline && onResults) {
+        // Modo inline (Dashboard)
+        const res = await Api.searchFlights(params)
+        onResults(res)
+        window.scrollTo({ top: 600, behavior: 'smooth' })
+      } else {
+        // Navegar a página de resultados con comparación
+        navigate('/results', { state: { searchParams: params } })
+      }
+    } catch (err) {
+      console.error('Error searching flights:', err)
+      alert('Error al buscar vuelos')
     } finally {
       setLoading(false)
     }

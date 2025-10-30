@@ -7,6 +7,7 @@ import Admin from './pages/Admin.jsx'
 import Cashier from './pages/Cashier.jsx'
 import Profile from './pages/Profile.jsx'
 import Checkout from './pages/Checkout.jsx'
+import FlightResults from './pages/FlightResults.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 const brand = {
@@ -88,6 +89,7 @@ export default function App() {
       <main className="main">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/results" element={<FlightResults />} />
           <Route path="/login" element={<Login onLogin={auth.login} />} />
           <Route path="/register" element={<Register onLogin={auth.login} />} />
           <Route 

@@ -129,14 +129,21 @@ export const Api = {
     return data.map(f => ({
       id: f.id,
       airline: f.airline,
+      airline_id: f.airline_id,
       from: f.from_city,
+      from_city: f.from_city,
       to: f.to_city,
+      to_city: f.to_city,
       date: f.date,
       time: f.time,
       durationMin: f.duration_min,
+      duration_min: f.duration_min,
       priceCOP: f.price_cop,
+      price_cop: f.price_cop,
       category: f.category,
-      totalPriceCOP: f.price_cop * nPassengers
+      available_seats: f.available_seats,
+      totalPriceCOP: f.price_cop * nPassengers,
+      total_price_cop: f.price_cop * nPassengers
     }))
   },
 

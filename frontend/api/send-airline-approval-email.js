@@ -2,20 +2,27 @@
 // Configurado para usar Gmail SMTP
 
 export default async function handler(req, res) {
-  // Establecer headers CORS y JSON
+  // Establecer headers JSON primero
   res.setHeader('Content-Type', 'application/json')
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end()
+  }
   
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
   try {
-    const { company_name, company_email } = req.body
+    const { company_name, company_email } = req.body || {}
     
     if (!company_name || !company_email) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Faltan datos requeridos' 
+        message: 'Faltan datos requeridos: company_name y company_email' 
       })
     }
     
@@ -28,7 +35,6 @@ export default async function handler(req, res) {
     if (!smtpServer || !smtpUser || !smtpPassword) {
       // Simular envío
       console.log(`[Email Simulado] Aprobación de aerolínea ${company_name} (${company_email})`)
-      console.log(`Para habilitar emails reales, configura SMTP_SERVER, SMTP_USER, SMTP_PASSWORD en Vercel`)
       
       return res.status(200).json({ 
         success: true, 
@@ -38,11 +44,26 @@ export default async function handler(req, res) {
     }
 
     // Enviar emails reales
+    let nodemailer
     try {
-      // Usar import dinámico para compatibilidad con ES modules
+      // Intentar importar nodemailer
       const nodemailerModule = await import('nodemailer')
-      const nodemailer = nodemailerModule.default || nodemailerModule
+      nodemailer = nodemailerModule.default || nodemailerModule
       
+      if (!nodemailer || !nodemailer.createTransport) {
+        throw new Error('nodemailer no está disponible correctamente')
+      }
+    } catch (importError) {
+      console.error('Error importando nodemailer:', importError)
+      return res.status(200).json({
+        success: false,
+        message: 'nodemailer no está disponible. Instala la dependencia en package.json',
+        error: importError.message,
+        note: 'Asegúrate de que nodemailer está en frontend/package.json'
+      })
+    }
+    
+    try {
       const transporter = nodemailer.createTransport({
         host: smtpServer,
         port: parseInt(smtpPort),
@@ -52,6 +73,9 @@ export default async function handler(req, res) {
           pass: smtpPassword
         }
       })
+
+      // Verificar conexión antes de enviar
+      await transporter.verify()
 
       // Email a la empresa
       const companyMailOptions = {
@@ -72,18 +96,7 @@ export default async function handler(req, res) {
             </body>
           </html>
         `,
-        text: `
-¡Felicidades! Tu solicitud ha sido aprobada
-
-Estimados representantes de ${company_name},
-
-Nos complace informarles que su solicitud para vender vuelos en VivaAir ha sido APROBADA.
-
-Ya pueden comenzar a gestionar sus vuelos desde el panel de administración.
-
-Saludos cordiales,
-Equipo VivaAir
-        `
+        text: `¡Felicidades! Tu solicitud ha sido aprobada\n\nEstimados representantes de ${company_name},\n\nNos complace informarles que su solicitud para vender vuelos en VivaAir ha sido APROBADA.\n\nYa pueden comenzar a gestionar sus vuelos desde el panel de administración.\n\nSaludos cordiales,\nEquipo VivaAir`
       }
 
       // Email al admin
@@ -103,27 +116,21 @@ Equipo VivaAir
             </body>
           </html>
         `,
-        text: `
-Aerolínea Aprobada
-
-La aerolínea ${company_name} ha sido aprobada exitosamente.
-
-Email: ${company_email}
-Fecha: ${new Date().toLocaleString('es-CO')}
-        `
+        text: `Aerolínea Aprobada\n\nLa aerolínea ${company_name} ha sido aprobada exitosamente.\n\nEmail: ${company_email}\nFecha: ${new Date().toLocaleString('es-CO')}`
       }
 
       // Enviar ambos emails
-      await Promise.all([
+      const results = await Promise.all([
         transporter.sendMail(companyMailOptions),
         transporter.sendMail(adminMailOptions)
       ])
       
-      console.log(`[Emails Enviados] Aprobación a ${company_email} y ${adminEmail}`)
+      console.log(`[Emails Enviados] Aprobación a ${company_email} y ${adminEmail}`, results.map(r => r.messageId))
       
       return res.status(200).json({ 
         success: true, 
-        message: `Emails enviados exitosamente a ${company_email} y ${adminEmail}` 
+        message: `Emails enviados exitosamente a ${company_email} y ${adminEmail}`,
+        messageIds: results.map(r => r.messageId)
       })
     } catch (emailError) {
       console.error('Error enviando emails con nodemailer:', emailError)
@@ -135,7 +142,7 @@ Fecha: ${new Date().toLocaleString('es-CO')}
       })
     }
   } catch (error) {
-    console.error('Email error:', error)
+    console.error('Error general en handler:', error)
     return res.status(500).json({ 
       success: false, 
       message: error.message || 'Error desconocido al procesar email',

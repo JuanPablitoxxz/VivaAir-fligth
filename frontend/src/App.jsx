@@ -7,6 +7,7 @@ import Admin from './pages/Admin.jsx'
 import Cashier from './pages/Cashier.jsx'
 import Profile from './pages/Profile.jsx'
 import Checkout from './pages/Checkout.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 const brand = {
   primary: '#3da9fc', // azul claro
@@ -89,10 +90,31 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/login" element={<Login onLogin={auth.login} />} />
           <Route path="/register" element={<Register onLogin={auth.login} />} />
-          <Route path="/profile" element={role === 'CLIENTE' ? <Profile /> : <Navigate to="/login" />} />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute requiredRole="CLIENTE" currentRole={role}>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin" element={role === 'ADM' ? <Admin /> : <Navigate to="/login" />} />
-          <Route path="/caja" element={role === 'CAJERO' ? <Cashier /> : <Navigate to="/login" />} />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requiredRole="ADM" currentRole={role}>
+                <Admin />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/caja" 
+            element={
+              <ProtectedRoute requiredRole="CAJERO" currentRole={role}>
+                <Cashier />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </main>
 

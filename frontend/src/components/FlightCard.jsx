@@ -27,7 +27,7 @@ function formatDate(dateStr) {
   return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`
 }
 
-export default function FlightCard({ flight, variant = 'destination' }){
+export default function FlightCard({ flight, variant = 'destination', onSelect }){
   if (variant === 'destination') {
     const hours = Math.floor(flight.durationMin / 60)
     const mins = flight.durationMin % 60

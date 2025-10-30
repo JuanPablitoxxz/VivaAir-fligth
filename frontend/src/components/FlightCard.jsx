@@ -4,37 +4,67 @@ function formatCOP(v){
   return v.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 }
 
-function getCityInitials(city) {
-  return city?.substring(0, 2).toUpperCase() || 'CO'
+function getCityImageUrl(city) {
+  const cityMap = {
+    'Bogotá': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400',
+    'Medellín': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400',
+    'Cali': 'https://images.unsplash.com/photo-1587330979470-3585acb56371?w=400',
+    'Cartagena': 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=400',
+    'Barranquilla': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400',
+    'Bucaramanga': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400',
+    'Pereira': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
+    'Santa Marta': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400',
+    'Cúcuta': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
+    'Ibagué': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'
+  }
+  return cityMap[city] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'
 }
 
-export default function FlightCard({ flight, variant = 'list' }){
+function formatDate(dateStr) {
+  const date = new Date(dateStr + 'T00:00:00')
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`
+}
+
+export default function FlightCard({ flight, variant = 'destination' }){
   if (variant === 'destination') {
+    const hours = Math.floor(flight.durationMin / 60)
+    const mins = flight.durationMin % 60
+    const duration = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
+    
     return (
-      <div className="flight-card">
-        <div className="flight-card-image">
-          {getCityInitials(flight.to)}
+      <div className="flight-destination-card">
+        <div className="flight-card-image-container">
+          <img 
+            src={getCityImageUrl(flight.to)} 
+            alt={flight.to}
+            className="flight-card-image"
+            onError={(e) => {
+              e.target.style.display = 'none'
+              e.target.nextSibling.style.display = 'flex'
+            }}
+          />
+          <div className="flight-card-image-fallback" style={{ display: 'none' }}>
+            {flight.to.substring(0, 2).toUpperCase()}
+          </div>
         </div>
         <div className="flight-card-content">
-          <span className="tag" style={{ marginBottom: '8px' }}>VUELO</span>
-          <h3 style={{ margin: '0 0 8px 0', fontSize: '22px', fontWeight: 800, color: 'var(--text)' }}>
-            Vuelos a {flight.to}
+          <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', fontWeight: 700, color: 'var(--text)' }}>
+            {flight.to}
           </h3>
           <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: 'var(--text-light)' }}>
-            Partiendo desde {flight.from}
+            {duration}, non-stop
           </p>
           <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: 'var(--text-light)' }}>
-            Por {flight.airline}
+            {formatDate(flight.date)} ▸ {formatDate(new Date(new Date(flight.date).getTime() + 3*24*60*60*1000).toISOString().split('T')[0])}
           </p>
           <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid var(--muted)' }}>
             <div style={{ fontSize: '12px', color: 'var(--text-light)', marginBottom: '4px' }}>
-              Precio desde
+              from
             </div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text)', marginBottom: '8px' }}>
-              {formatCOP(flight.priceCOP)}
-            </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-light)' }}>
-              {flight.durationMin} min · Sin escalas
+            <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text)' }}>
+              {formatCOP(flight.priceCOP).replace('COP', '$')}
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
 import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
 import Admin from './pages/Admin.jsx'
 import Cashier from './pages/Cashier.jsx'
 
@@ -77,6 +78,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/login" element={<Login onLogin={auth.login} />} />
+          <Route path="/register" element={<Register onLogin={auth.login} />} />
           <Route path="/admin" element={role === 'ADM' ? <Admin /> : <Dashboard />} />
           <Route path="/caja" element={role === 'CAJERO' ? <Cashier /> : <Dashboard />} />
         </Routes>

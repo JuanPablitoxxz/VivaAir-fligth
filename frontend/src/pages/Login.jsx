@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Api } from '../api'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 export default function Login({ onLogin }){
   const [email, setEmail] = useState('cliente@vivaair.co')
@@ -37,9 +37,9 @@ export default function Login({ onLogin }){
           <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" />
         </div>
         {error && <div style={{ color: '#dc2626', fontSize: 14 }}>{error}</div>}
-        <button className="btn" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
-        <div style={{ fontSize: 12, color: '#64748b' }}>
-          Pruebas: admin@vivaair.co / admin123 · cajero@vivaair.co / cajero123 · cliente@vivaair.co / cliente123
+        <button className="btn" disabled={loading}>{loading ? 'Entrando...' :-kind 'Entrar'}</button>
+        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: 14, color: 'var(--text-light)' }}>
+          ¿No tienes cuenta? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>Regístrate</Link>
         </div>
       </form>
     </div>

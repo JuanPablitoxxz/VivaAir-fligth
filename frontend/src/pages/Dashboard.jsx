@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Api } from '../api'
 import SearchBar from '../components/SearchBar.jsx'
 import FlightCard from '../components/FlightCard.jsx'
+import FlightTypeCard from '../components/FlightTypeCard.jsx'
 
 export default function Dashboard(){
   const [groups, setGroups] = useState({ economico: [], normal: [], preferencial: [], premium: [] })
@@ -42,11 +43,24 @@ export default function Dashboard(){
         ) : (
           <>
             <section style={{ marginTop: '60px' }}>
-              <h2 className="section-title">Vuelos destacados</h2>
+              <h2 className="section-title">Tipos de vuelo</h2>
+              <p className="section-subtitle">Selecciona un tipo para ver más detalles</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  <FlightTypeCard type="economico" />
+                  <FlightTypeCard type="normal" />
+                  <FlightTypeCard type="preferencial" />
+                  <FlightTypeCard type="premium" />
+                </div>
+              </div>
+            </section>
+
+            <section style={{ marginTop: '60px' }}>
+              <h2 className="section-title">Travel deals</h2>
               <p className="section-subtitle">Las mejores ofertas a destinos populares</p>
               <div className="scroll-container">
                 <div className="scroll-content">
-                  {[...groups.economico, ...groups.normal, ...groups.preferencial].slice(0, 8).map(f => (
+                  {[...groups.economico, ...groups.normal].slice(0, 12).map(f => (
                     <FlightCard key={f.id} flight={f} variant="destination" />
                   ))}
                 </div>

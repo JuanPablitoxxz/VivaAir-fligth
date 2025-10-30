@@ -1,0 +1,9 @@
+{
+  "name": "vivaair-api",
+  "version": "1.0.0",
+  "description": "API functions for VivaAir",
+  "dependencies": {
+    "nodemailer": "^6.9.7"
+  }
+}
+

@@ -1,5 +1,6 @@
 import React from 'react'
 
+// Imágenes específicas y acordes a cada ciudad colombiana
 const cityImages = {
   'Bogotá': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400&h=300&fit=crop',
   'Medellín': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop',

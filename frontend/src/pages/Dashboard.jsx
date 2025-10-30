@@ -4,18 +4,13 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar.jsx'
 import FlightCard from '../components/FlightCard.jsx'
 import DestinationCard from '../components/DestinationCard.jsx'
+import FlightTypeCard from '../components/FlightTypeCard.jsx'
 
 export default function Dashboard(){
   const [results, setResults] = useState(null)
-  const [cities, setCities] = useState([])
   const navigate = useNavigate()
 
-  useEffect(() => {
-    Api.cities().then(setCities).catch(() => setCities([]))
-  }, [])
-
   const popularDestinations = ['Cartagena', 'Medellín', 'Cali', 'Santa Marta', 'Barranquilla']
-  
   const handleDestinationClick = (city) => {
     setResults(null)
     // Simular búsqueda por destino
@@ -71,17 +66,15 @@ export default function Dashboard(){
             </section>
 
             <section style={{ marginTop: '60px' }}>
-              <h2 className="section-title">Todos nuestros destinos</h2>
-              <p className="section-subtitle">Explora las ciudades disponibles para volar</p>
-              <div className="destinations-grid">
-                {cities.map(city => (
-                  <DestinationCard 
-                    key={city} 
-                    city={city} 
-                    isPopular={popularDestinations.includes(city)}
-                    onClick={() => handleDestinationClick(city)}
-                  />
-                ))}
+              <h2 className="section-title">Tipos de vuelo</h2>
+              <p className="section-subtitle">Elige la opción que mejor se adapte a tus necesidades</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  <FlightTypeCard type="economico" />
+                  <FlightTypeCard type="normal" />
+                  <FlightTypeCard type="preferencial" />
+                  <FlightTypeCard type="premium" />
+                </div>
               </div>
             </section>
           </>

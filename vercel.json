@@ -5,13 +5,9 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "frontend/api/$1.js" },
-    { "src": "/(.*)\\.(css|js|png|jpg|jpeg|gif|svg|ico|txt|webp|json|map|woff|woff2|ttf|eot)", "dest": "frontend/dist/$1.$2" },
-    { "src": "/", "dest": "frontend/dist/index.html" },
-    { "src": "/(.*)", "dest": "frontend/dist/index.html" }
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
-  "env": {},
   "github": { "silent": true },
   "installCommand": "npm --prefix frontend install --include=dev",
-  "buildCommand": "npm --prefix frontend run build",
-  "outputDirectory": "frontend/dist"
+  "buildCommand": "npm --prefix frontend run build"
 }

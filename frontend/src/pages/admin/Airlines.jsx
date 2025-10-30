@@ -126,14 +126,24 @@ export default function Airlines() {
       if (updateError) throw updateError
 
       // Enviar email de aprobación
-      await fetch('/api/send-airline-approval-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_name: request.company_name,
-          company_email: request.company_email
+      try {
+        const emailRes = await fetch('/api/send-airline-approval-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            company_name: request.company_name,
+            company_email: request.company_email
+          })
         })
-      })
+        
+        const emailData = await emailRes.json()
+        if (emailData.note) {
+          console.warn(emailData.note)
+        }
+      } catch (emailErr) {
+        console.error('Error enviando email:', emailErr)
+        // Continuar aunque el email falle
+      }
 
       loadAirlines()
       loadRequests()
@@ -151,6 +161,29 @@ export default function Airlines() {
       .eq('id', airlineId)
     
     if (!error) loadAirlines()
+  }
+
+  const deleteAirline = async (airlineId, airlineName) => {
+    const confirmMessage = `¿Estás seguro de que deseas eliminar la aerolínea "${airlineName}"?\n\nEsta acción no se puede deshacer.`
+    
+    if (!confirm(confirmMessage)) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('airlines')
+        .delete()
+        .eq('id', airlineId)
+      
+      if (error) throw error
+      
+      alert(`Aerolínea "${airlineName}" eliminada exitosamente.`)
+      loadAirlines()
+    } catch (err) {
+      console.error('Error deleting airline:', err)
+      alert('Error al eliminar aerolínea: ' + err.message)
+    }
   }
 
   return (
@@ -256,12 +289,21 @@ export default function Airlines() {
                   <p>{airline.email}</p>
                   <span className="tag">{airline.status}</span>
                 </div>
-                <button 
-                  className={airline.status === 'activa' ? 'btn-outline' : 'btn'}
-                  onClick={() => toggleAirlineStatus(airline.id, airline.status)}
-                >
-                  {airline.status === 'activa' ? 'Desactivar' : 'Activar'}
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    className={airline.status === 'activa' ? 'btn-outline' : 'btn'}
+                    onClick={() => toggleAirlineStatus(airline.id, airline.status)}
+                  >
+                    {airline.status === 'activa' ? 'Desactivar' : 'Activar'}
+                  </button>
+                  <button 
+                    className="btn-outline"
+                    style={{ color: '#dc2626', borderColor: '#dc2626' }}
+                    onClick={() => deleteAirline(airline.id, airline.name)}
+                  >
+                    🗑️ Eliminar
+                  </button>
+                </div>
               </div>
             </div>
           ))}

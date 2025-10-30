@@ -13,59 +13,96 @@ export default function Dashboard(){
 
   return (
     <div>
-      <section style={{ marginBottom: 16 }}>
-        <h2 style={{ margin: '8px 0' }}>Busca vuelos nacionales</h2>
+      <div className="hero-section">
+        <h1>VivaAir</h1>
+        <p>Vuelos nacionales en Colombia - Encuentra las mejores tarifas</p>
+      </div>
+
+      <div style={{ background: 'var(--bg-light)', paddingBottom: '40px' }}>
         <SearchBar onResults={setResults} />
-      </section>
 
-      {results ? (
-        <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: '8px 0' }}>Resultados</h3>
-            <button className="btn-outline" onClick={() => setResults(null)}>Limpiar</button>
-          </div>
-          <div className="results">
-            {results.map(f => <FlightCard key={f.id} flight={f} />)}
-          </div>
-        </section>
-      ) : (
-        <>
-          <section style={{ marginTop: 20 }}>
-            <h3 style={{ margin: '8px 0' }}>Desde qué precios</h3>
-            <div className="grid grid-3">
-              {groups.economico.slice(0, 3).map(f => <FlightCard key={f.id} flight={f} />)}
+        {results ? (
+          <section style={{ padding: '0 24px', marginTop: '60px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 className="section-title" style={{ margin: '0' }}>Resultados de búsqueda</h2>
+              <button className="btn-outline" onClick={() => { setResults(null); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+                Nueva búsqueda
+              </button>
             </div>
-          </section>
-
-          <section style={{ marginTop: 20 }}>
-            <h3 style={{ margin: '8px 0' }}>Económicos</h3>
             <div className="results">
-              {groups.economico.map(f => <FlightCard key={f.id} flight={f} />)}
+              {results.length > 0 ? (
+                results.map(f => <FlightCard key={f.id} flight={f} variant="list" />)
+              ) : (
+                <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+                  <p style={{ fontSize: '18px', color: 'var(--text-light)' }}>No se encontraron vuelos para tu búsqueda</p>
+                </div>
+              )}
             </div>
           </section>
+        ) : (
+          <>
+            <section style={{ marginTop: '60px' }}>
+              <h2 className="section-title">Vuelos destacados</h2>
+              <p className="section-subtitle">Las mejores ofertas a destinos populares</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  {[...groups.economico, ...groups.normal, ...groups.preferencial].slice(0, 8).map(f => (
+                    <FlightCard key={f.id} flight={f} variant="destination" />
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          <section style={{ marginTop: 20 }}>
-            <h3 style={{ margin: '8px 0' }}>Normales</h3>
-            <div className="results">
-              {groups.normal.map(f => <FlightCard key={f.id} flight={f} />)}
-            </div>
-          </section>
+            <section>
+              <h2 className="section-title">Vuelos económicos desde</h2>
+              <p className="section-subtitle">Los precios más bajos para viajar por Colombia</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  {groups.economico.map(f => (
+                    <FlightCard key={f.id} flight={f} variant="destination" />
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          <section style={{ marginTop: 20 }}>
-            <h3 style={{ margin: '8px 0' }}>Preferenciales</h3>
-            <div className="results">
-              {groups.preferencial.map(f => <FlightCard key={f.id} flight={f} />)}
-            </div>
-          </section>
+            <section>
+              <h2 className="section-title">Vuelos normales</h2>
+              <p className="section-subtitle">Comodidad y precio equilibrados</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  {groups.normal.map(f => (
+                    <FlightCard key={f.id} flight={f} variant="destination" />
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          <section style={{ marginTop: 20 }}>
-            <h3 style={{ margin: '8px 0' }}>Premium / Primera</h3>
-            <div className="results">
-              {groups.premium.map(f => <FlightCard key={f.id} flight={f} />)}
-            </div>
-          </section>
-        </>
-      )}
+            <section>
+              <h2 className="section-title">Clase preferencial</h2>
+              <p className="section-subtitle">Mayor espacio y comodidad</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  {groups.preferencial.map(f => (
+                    <FlightCard key={f.id} flight={f} variant="destination" />
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="section-title">Premium / Primera clase</h2>
+              <p className="section-subtitle">La máxima experiencia de vuelo</p>
+              <div className="scroll-container">
+                <div className="scroll-content">
+                  {groups.premium.map(f => (
+                    <FlightCard key={f.id} flight={f} variant="destination" />
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+      </div>
     </div>
   )
 }

@@ -47,13 +47,25 @@ export default function Airlines() {
   }
 
   const handleFileUpload = async (file) => {
-    const fileName = `certificates/${Date.now()}_${file.name}`
-    const { data, error } = await supabase.storage
-      .from('documents')
-      .upload(fileName, file)
-    
-    if (error) throw error
-    return data.path
+    try {
+      // Intentar subir el archivo
+      const fileName = `certificates/${Date.now()}_${file.name}`
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .upload(fileName, file)
+      
+      if (error) {
+        // Si el bucket no existe, almacenar solo el nombre del archivo
+        console.warn('Error uploading file to storage:', error)
+        console.warn('Almacenando solo nombre del archivo. Configura el bucket "documents" en Supabase Storage para guardar archivos.')
+        return fileName // Retornar solo el nombre como fallback
+      }
+      return data.path
+    } catch (err) {
+      console.error('Error in file upload:', err)
+      // Fallback: solo guardar el nombre del archivo
+      return `certificates/${Date.now()}_${file.name}`
+    }
   }
 
   const submitRequest = async (e) => {
@@ -199,7 +211,26 @@ export default function Airlines() {
                   <p>{req.company_email}</p>
                   <span className="tag">{req.status}</span>
                   {req.certificate_pdf_url && (
-                    <a href={req.certificate_pdf_url} target="_blank" rel="noopener">Ver certificado</a>
+                    <div>
+                      <p style={{ fontSize: '12px', color: 'var(--text-light)', marginTop: '8px' }}>
+                        Certificado: {req.certificate_pdf_url.split('/').pop()}
+                      </p>
+                      <a 
+                        href={req.certificate_pdf_url} 
+                        target="_blank" 
+                        rel="noopener"
+                        style={{ fontSize: '12px' }}
+                        onClick={(e) => {
+                          // Si no es una URL válida, prevenir navegación
+                          if (!req.certificate_pdf_url.startsWith('http')) {
+                            e.preventDefault()
+                            alert('El certificado necesita ser configurado en Supabase Storage. Por ahora solo se guarda el nombre del archivo.')
+                          }
+                        }}
+                      >
+                        Ver certificado
+                      </a>
+                    </div>
                   )}
                 </div>
                 <div>

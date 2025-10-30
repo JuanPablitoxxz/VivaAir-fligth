@@ -16,13 +16,29 @@ export default function Metrics() {
 
   const loadMetrics = async () => {
     try {
-      const [usersRes, flightsRes, reservationsRes, airlinesRes, revenueRes] = await Promise.all([
+      const [usersRes, flightsRes, reservationsRes] = await Promise.all([
         supabase.from('users').select('id', { count: 'exact', head: true }),
         supabase.from('flights').select('id', { count: 'exact', head: true }),
-        supabase.from('reservations').select('id', { count: 'exact', head: true }),
-        supabase.from('airlines').select('id').eq('status', 'activa').catch(() => ({ data: [] })),
-        supabase.from('payments').select('amount').eq('status', 'completado').catch(() => ({ data: [] }))
+        supabase.from('reservations').select('id', { count: 'exact', head: true })
       ])
+
+      // Consultas opcionales para tablas que pueden no existir
+      let airlinesRes = { data: [] }
+      let revenueRes = { data: [] }
+      
+      try {
+        const airlinesQuery = await supabase.from('airlines').select('id').eq('status', 'activa')
+        if (!airlinesQuery.error) airlinesRes = airlinesQuery
+      } catch (e) {
+        console.warn('Airlines table may not exist:', e)
+      }
+
+      try {
+        const paymentsQuery = await supabase.from('payments').select('amount').eq('status', 'completado')
+        if (!paymentsQuery.error) revenueRes = paymentsQuery
+      } catch (e) {
+        console.warn('Payments table may not exist:', e)
+      }
 
       const revenue = revenueRes.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
 

@@ -1,6 +1,6 @@
 import { supabase } from './lib/supabase'
 
-// Helper para hashear passwords (simple para demo, usar bcrypt en producción)
+// Helper para hashear passwords (SHA-256 para coincidir con PostgreSQL)
 async function hashPassword(password) {
   const encoder = new TextEncoder()
   const data = encoder.encode(password)
@@ -12,39 +12,78 @@ async function hashPassword(password) {
 
 export const Api = {
   async login(email, password) {
-    const hashed = await hashPassword(password)
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, email, role, name')
-      .eq('email', email)
-      .eq('password_hash', hashed)
-      .single()
-    
-    if (error || !data) {
-      throw new Error('Credenciales inválidas')
+    try {
+      const hashed = await hashPassword(password)
+      
+      // Primero buscar el usuario por email
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, role, name, password_hash')
+        .eq('email', email)
+        .single()
+      
+      if (error) {
+        console.error('Supabase error:', error)
+        throw new Error('Error al buscar usuario: ' + (error.message || 'Usuario no encontrado'))
+      }
+      
+      if (!data) {
+        throw new Error('Usuario no encontrado')
+      }
+      
+      // Comparar hashes
+      if (data.password_hash !== hashed) {
+        console.error('Password hash mismatch')
+        throw new Error('Contraseña incorrecta')
+      }
+      
+      // Generar token
+      const token = btoa(`${data.id}:${data.role}`)
+      return { 
+        token, 
+        user: { 
+          id: data.id, 
+          email: data.email, 
+          role: data.role, 
+          name: data.name 
+        } 
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      throw err
     }
-    
-    // Simular token (en producción usar JWT real)
-    const token = Buffer.from(`${data.id}:${data.role}`).toString('base64')
-    return { token, user: data }
   },
 
   async register(email, password, name, role = 'CLIENTE') {
-    const hashed = await hashPassword(password)
-    const { data, error } = await supabase
-      .from('users')
-      .insert([
-        { email, password_hash: hashed, name, role }
-      ])
-      .select('id, email, role, name')
-      .single()
-    
-    if (error) {
-      throw new Error(error.message || 'Error al registrar usuario')
+    try {
+      const hashed = await hashPassword(password)
+      
+      const { data, error } = await supabase
+        .from('users')
+        .insert([
+          { email, password_hash: hashed, name, role }
+        ])
+        .select('id, email, role, name')
+        .single()
+      
+      if (error) {
+        console.error('Register error:', error)
+        if (error.code === '23505') {
+          throw new Error('Este correo ya está registrado')
+        }
+        throw new Error(error.message || 'Error al registrar usuario')
+      }
+      
+      if (!data) {
+        throw new Error('Error al crear usuario')
+      }
+      
+      const token = btoa(`${data.id}:${data.role}`)
+      return { token, user: data }
+    } catch (err) {
+      console.error('Register error:', err)
+      throw err
     }
-    
-    const token = Buffer.from(`${data.id}:${data.role}`).toString('base64')
-    return { token, user: data }
   },
 
   async cities() {

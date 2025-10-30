@@ -1,0 +1,15 @@
+{
+  "builds": [
+    { "src": "frontend/api/**/*.js", "use": "@vercel/node" },
+    { "src": "frontend/index.html", "use": "@vercel/static-build", "config": { "distDir": "frontend/dist" } }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "frontend/api/$1.js" },
+    { "src": "/(.*)", "dest": "frontend/dist/index.html" }
+  ],
+  "env": {},
+  "github": { "silent": true },
+  "installCommand": "npm --prefix frontend ci || npm --prefix frontend install",
+  "buildCommand": "npm --prefix frontend run build",
+  "outputDirectory": "frontend/dist"
+}

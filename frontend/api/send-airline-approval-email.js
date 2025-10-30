@@ -2,12 +2,22 @@
 // Configurado para usar Gmail SMTP
 
 export default async function handler(req, res) {
+  // Establecer headers CORS y JSON
+  res.setHeader('Content-Type', 'application/json')
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
   try {
     const { company_name, company_email } = req.body
+    
+    if (!company_name || !company_email) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Faltan datos requeridos' 
+      })
+    }
     
     const smtpServer = process.env.SMTP_SERVER
     const smtpUser = process.env.SMTP_USER
@@ -20,7 +30,7 @@ export default async function handler(req, res) {
       console.log(`[Email Simulado] Aprobación de aerolínea ${company_name} (${company_email})`)
       console.log(`Para habilitar emails reales, configura SMTP_SERVER, SMTP_USER, SMTP_PASSWORD en Vercel`)
       
-      return res.json({ 
+      return res.status(200).json({ 
         success: true, 
         message: `Emails simulados enviados a ${company_email} y ${adminEmail}`,
         note: 'Configura variables SMTP en Vercel para enviar emails reales'
@@ -30,7 +40,8 @@ export default async function handler(req, res) {
     // Enviar emails reales
     try {
       // Usar import dinámico para compatibilidad con ES modules
-      const nodemailer = (await import('nodemailer')).default
+      const nodemailerModule = await import('nodemailer')
+      const nodemailer = nodemailerModule.default || nodemailerModule
       
       const transporter = nodemailer.createTransport({
         host: smtpServer,
@@ -110,16 +121,17 @@ Fecha: ${new Date().toLocaleString('es-CO')}
       
       console.log(`[Emails Enviados] Aprobación a ${company_email} y ${adminEmail}`)
       
-      return res.json({ 
+      return res.status(200).json({ 
         success: true, 
         message: `Emails enviados exitosamente a ${company_email} y ${adminEmail}` 
       })
     } catch (emailError) {
       console.error('Error enviando emails con nodemailer:', emailError)
-      return res.json({ 
+      return res.status(200).json({ 
         success: false, 
         message: `Error al enviar emails: ${emailError.message}`,
-        note: 'Verifica la configuración SMTP en Vercel'
+        note: 'Verifica la configuración SMTP en Vercel',
+        error: emailError.toString()
       })
     }
   } catch (error) {

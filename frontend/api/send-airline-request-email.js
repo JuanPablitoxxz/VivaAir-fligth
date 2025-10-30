@@ -2,12 +2,22 @@
 // Configurado para usar Gmail SMTP
 
 export default async function handler(req, res) {
+  // Establecer headers CORS y JSON
+  res.setHeader('Content-Type', 'application/json')
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
   try {
     const { company_name, company_email } = req.body
+    
+    if (!company_name || !company_email) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Faltan datos requeridos' 
+      })
+    }
     
     // Verificar si hay configuración SMTP
     const smtpServer = process.env.SMTP_SERVER
@@ -20,7 +30,7 @@ export default async function handler(req, res) {
       console.log(`[Email Simulado] Solicitud de aerolínea de ${company_name} (${company_email})`)
       console.log(`Para habilitar emails reales, configura SMTP_SERVER, SMTP_USER, SMTP_PASSWORD en Vercel`)
       
-      return res.json({ 
+      return res.status(200).json({ 
         success: true, 
         message: `Email simulado enviado a ${company_email}`,
         note: 'Configura variables SMTP en Vercel para enviar emails reales'
@@ -30,7 +40,8 @@ export default async function handler(req, res) {
     // Enviar email real usando nodemailer
     try {
       // Usar import dinámico para compatibilidad con ES modules
-      const nodemailer = (await import('nodemailer')).default
+      const nodemailerModule = await import('nodemailer')
+      const nodemailer = nodemailerModule.default || nodemailerModule
       
       const transporter = nodemailer.createTransport({
         host: smtpServer,
@@ -80,21 +91,26 @@ Equipo VivaAir
       await transporter.sendMail(mailOptions)
       console.log(`[Email Enviado] Solicitud de aerolínea a ${company_email}`)
       
-      return res.json({ 
+      return res.status(200).json({ 
         success: true, 
         message: `Email enviado exitosamente a ${company_email}` 
       })
     } catch (emailError) {
       console.error('Error enviando email con nodemailer:', emailError)
       // Si nodemailer falla, retornar error pero no fallar completamente
-      return res.json({ 
+      return res.status(200).json({ 
         success: false, 
         message: `Error al enviar email: ${emailError.message}`,
-        note: 'Verifica la configuración SMTP en Vercel'
+        note: 'Verifica la configuración SMTP en Vercel',
+        error: emailError.toString()
       })
     }
   } catch (error) {
     console.error('Email error:', error)
-    return res.json({ success: false, message: error.message })
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Error desconocido al procesar email',
+      error: error.toString()
+    })
   }
 }

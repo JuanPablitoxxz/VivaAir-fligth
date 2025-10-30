@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { Api } from '../api'
+import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar.jsx'
 import FlightCard from '../components/FlightCard.jsx'
-import FlightTypeCard from '../components/FlightTypeCard.jsx'
+import DestinationCard from '../components/DestinationCard.jsx'
 
 export default function Dashboard(){
-  const [groups, setGroups] = useState({ economico: [], normal: [], preferencial: [], premium: [] })
   const [results, setResults] = useState(null)
+  const [cities, setCities] = useState([])
+  const navigate = useNavigate()
 
   useEffect(() => {
-    Api.dashboard().then(setGroups).catch(() => setGroups({ economico: [], normal: [], preferencial: [], premium: [] }))
+    Api.cities().then(setCities).catch(() => setCities([]))
   }, [])
+
+  const popularDestinations = ['Cartagena', 'Medellín', 'Cali', 'Santa Marta', 'Barranquilla']
+  
+  const handleDestinationClick = (city) => {
+    setResults(null)
+    // Simular búsqueda por destino
+    Api.searchFlights({ to: city }).then(setResults).catch(() => setResults([]))
+    window.scrollTo({ top: 600, behavior: 'smooth' })
+  }
 
   return (
     <div>
@@ -43,75 +54,34 @@ export default function Dashboard(){
         ) : (
           <>
             <section style={{ marginTop: '60px' }}>
-              <h2 className="section-title">Tipos de vuelo</h2>
-              <p className="section-subtitle">Selecciona un tipo para ver más detalles</p>
+              <h2 className="section-title">Destinos más visitados</h2>
+              <p className="section-subtitle">Los lugares favoritos para viajar en Colombia</p>
               <div className="scroll-container">
                 <div className="scroll-content">
-                  <FlightTypeCard type="economico" />
-                  <FlightTypeCard type="normal" />
-                  <FlightTypeCard type="preferencial" />
-                  <FlightTypeCard type="premium" />
+                  {popularDestinations.map(city => (
+                    <DestinationCard 
+                      key={city} 
+                      city={city} 
+                      isPopular={true}
+                      onClick={() => handleDestinationClick(city)}
+                    />
+                  ))}
                 </div>
               </div>
             </section>
 
             <section style={{ marginTop: '60px' }}>
-              <h2 className="section-title">Travel deals</h2>
-              <p className="section-subtitle">Las mejores ofertas a destinos populares</p>
-              <div className="scroll-container">
-                <div className="scroll-content">
-                  {[...groups.economico, ...groups.normal].slice(0, 12).map(f => (
-                    <FlightCard key={f.id} flight={f} variant="destination" />
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="section-title">Vuelos económicos desde</h2>
-              <p className="section-subtitle">Los precios más bajos para viajar por Colombia</p>
-              <div className="scroll-container">
-                <div className="scroll-content">
-                  {groups.economico.map(f => (
-                    <FlightCard key={f.id} flight={f} variant="destination" />
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="section-title">Vuelos normales</h2>
-              <p className="section-subtitle">Comodidad y precio equilibrados</p>
-              <div className="scroll-container">
-                <div className="scroll-content">
-                  {groups.normal.map(f => (
-                    <FlightCard key={f.id} flight={f} variant="destination" />
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="section-title">Clase preferencial</h2>
-              <p className="section-subtitle">Mayor espacio y comodidad</p>
-              <div className="scroll-container">
-                <div className="scroll-content">
-                  {groups.preferencial.map(f => (
-                    <FlightCard key={f.id} flight={f} variant="destination" />
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="section-title">Premium / Primera clase</h2>
-              <p className="section-subtitle">La máxima experiencia de vuelo</p>
-              <div className="scroll-container">
-                <div className="scroll-content">
-                  {groups.premium.map(f => (
-                    <FlightCard key={f.id} flight={f} variant="destination" />
-                  ))}
-                </div>
+              <h2 className="section-title">Todos nuestros destinos</h2>
+              <p className="section-subtitle">Explora las ciudades disponibles para volar</p>
+              <div className="destinations-grid">
+                {cities.map(city => (
+                  <DestinationCard 
+                    key={city} 
+                    city={city} 
+                    isPopular={popularDestinations.includes(city)}
+                    onClick={() => handleDestinationClick(city)}
+                  />
+                ))}
               </div>
             </section>
           </>

@@ -40,46 +40,9 @@ export default function App() {
   const auth = useAuth()
   const navigate = useNavigate()
 
-  // Verificar y redirigir según rol al cargar la app
   useEffect(() => {
-    const checkRoleAndRedirect = () => {
-      try {
-        const rawSession = localStorage.getItem('vivaair.session')
-        if (rawSession) {
-          const session = JSON.parse(rawSession)
-          const role = session?.user?.role
-          const currentPath = window.location.pathname
-          
-          // Si es CAJERO y está en dashboard o admin, redirigir
-          if (role === 'CAJERO' && (currentPath === '/' || currentPath === '/admin')) {
-            window.location.replace('/caja')
-            return
-          }
-          
-          // Si es ADM y está en dashboard o caja, redirigir
-          if (role === 'ADM' && (currentPath === '/' || currentPath === '/caja')) {
-            window.location.replace('/admin')
-            return
-          }
-          
-          // Si es CLIENTE y está en caja o admin, redirigir
-          if (role === 'CLIENTE' && (currentPath === '/caja' || currentPath === '/admin')) {
-            window.location.replace('/')
-            return
-          }
-        }
-      } catch (e) {
-        console.error('Error checking role:', e)
-      }
-    }
-    
-    // Ejecutar inmediatamente
-    checkRoleAndRedirect()
-    
-    // También verificar después de un delay para móviles
-    const timeout = setTimeout(checkRoleAndRedirect, 200)
-    
-    return () => clearTimeout(timeout)
+    // simple guard for role routes
+    // handled per route render below
   }, [auth.session])
 
   const role = auth.session?.user?.role

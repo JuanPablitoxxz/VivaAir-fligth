@@ -20,19 +20,33 @@ export default function Checkout() {
     cvv: ''
   })
 
+  const [loading, setLoading] = useState(false)
+  const [purchasing, setPurchasing] = useState(false)
+
   useEffect(() => {
     if (!session || !flight) {
-      navigate('/')
+      navigate('/', { replace: true })
     }
   }, [session, flight, navigate])
 
-  if (!session || !flight) return null
+  if (!session || !flight) {
+    return (
+      <div className="card" style={{ maxWidth: '600px', margin: '40px auto', textAlign: 'center' }}>
+        <p>Cargando...</p>
+      </div>
+    )
+  }
 
   const handlePurchase = async () => {
+    if (purchasing) return // Evitar múltiples clics
+    
+    setPurchasing(true)
+    setLoading(true)
+    
     try {
       // Crear reserva
       const ticketNumber = `VA-${Date.now()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`
-      const { data: reservation } = await supabase
+      const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert([{
           user_id: session.user.id,
@@ -45,9 +59,11 @@ export default function Checkout() {
         .select()
         .single()
 
+      if (reservationError) throw reservationError
+
       // Crear pago (PSE simulado siempre se marca como completado en simulación)
       const paymentStatus = formData.paymentMethod === 'pse' ? 'pendiente' : 'completado'
-      await supabase
+      const { error: paymentError } = await supabase
         .from('payments')
         .insert([{
           reservation_id: reservation.id,
@@ -56,9 +72,14 @@ export default function Checkout() {
           status: paymentStatus
         }])
 
+      if (paymentError) {
+        console.warn('Error creando pago:', paymentError)
+        // Continuar aunque falle el pago
+      }
+
       // Generar factura
       const invoiceNumber = `FAC-${Date.now()}`
-      await supabase
+      const { error: invoiceError } = await supabase
         .from('invoices')
         .insert([{
           reservation_id: reservation.id,
@@ -66,10 +87,24 @@ export default function Checkout() {
           total_amount: reservation.total_price
         }])
 
+      if (invoiceError) {
+        console.warn('Error creando factura:', invoiceError)
+        // Continuar aunque falle la factura
+      }
+
+      // Mostrar mensaje y navegar
       alert(`¡Compra exitosa! Tu ticket es: ${ticketNumber}`)
-      navigate('/profile')
+      
+      // Asegurar navegación
+      setTimeout(() => {
+        navigate('/profile', { replace: true })
+      }, 100)
+      
     } catch (err) {
-      alert('Error al procesar la compra: ' + err.message)
+      console.error('Error en compra:', err)
+      alert('Error al procesar la compra: ' + (err.message || 'Error desconocido'))
+      setPurchasing(false)
+      setLoading(false)
     }
   }
 
@@ -150,13 +185,19 @@ export default function Checkout() {
         </div>
       )}
 
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-light)' }}>
+          <p>Procesando compra...</p>
+        </div>
+      )}
+
       <button 
         className="btn btn-primary" 
         onClick={handlePurchase}
-        disabled={!formData.paymentMethod}
-        style={{ width: '100%' }}
+        disabled={!formData.paymentMethod || purchasing || loading}
+        style={{ width: '100%', marginTop: '16px' }}
       >
-        Confirmar y Pagar
+        {purchasing || loading ? 'Procesando...' : 'Confirmar y Pagar'}
       </button>
     </div>
   )

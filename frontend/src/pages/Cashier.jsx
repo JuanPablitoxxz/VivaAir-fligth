@@ -253,13 +253,20 @@ export default function Cashier(){
           console.log('SearchBar results received:', flights)
           setLoading(false)
           setSearchLoading(false)
-          setResults(flights || [])
-          if (flights && flights.length > 0) {
+          const flightResults = Array.isArray(flights) ? flights : []
+          setResults(flightResults)
+          console.log('Results updated, count:', flightResults.length)
+          if (flightResults.length > 0) {
             // Scroll suave a los resultados
             setTimeout(() => {
-              window.scrollTo({ top: 500, behavior: 'smooth' })
-            }, 100)
-          } else if (flights && flights.length === 0) {
+              const resultsSection = document.querySelector('.results')
+              if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              } else {
+                window.scrollTo({ top: 500, behavior: 'smooth' })
+              }
+            }, 200)
+          } else if (Array.isArray(flights) && flights.length === 0) {
             alert('No se encontraron vuelos para esa búsqueda. Intenta con otros criterios.')
           }
         }} 
@@ -271,8 +278,8 @@ export default function Cashier(){
           <p>Cargando vuelos disponibles...</p>
         </div>
       ) : results.length > 0 ? (
-        <section style={{ marginTop: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <section style={{ marginTop: '24px', padding: '0 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <h3 style={{ margin: 0 }}>Vuelos Disponibles ({results.length})</h3>
             <button 
               className="btn-outline" 
@@ -282,9 +289,9 @@ export default function Cashier(){
               🔄 Mostrar todos
             </button>
           </div>
-          <div className="results">
+          <div className="results" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {results.map(f => (
-              <div key={f.id} style={{ marginBottom: '16px' }}>
+              <div key={f.id} style={{ marginBottom: '0' }}>
                 <FlightCard flight={f} variant="list" />
                 <button 
                   className="btn btn-primary" 

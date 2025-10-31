@@ -23,17 +23,27 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
     setLoading(true)
     try {
       if (showResultsInline && onResults) {
-        // Modo inline (Dashboard)
+        // Modo inline (Dashboard/Cashier)
+        console.log('Searching with params:', params)
         const res = await Api.searchFlights(params)
-        onResults(res)
-        window.scrollTo({ top: 600, behavior: 'smooth' })
+        console.log('Search results:', res)
+        if (onResults) {
+          onResults(res || [])
+        }
+        // Solo hacer scroll si no estamos en cashier (que tiene su propio scroll)
+        if (window.location.pathname !== '/caja') {
+          window.scrollTo({ top: 600, behavior: 'smooth' })
+        }
       } else {
         // Navegar a página de resultados con comparación
         navigate('/results', { state: { searchParams: params } })
       }
     } catch (err) {
       console.error('Error searching flights:', err)
-      alert('Error al buscar vuelos')
+      alert('Error al buscar vuelos: ' + (err.message || 'Error desconocido'))
+      if (showResultsInline && onResults) {
+        onResults([])
+      }
     } finally {
       setLoading(false)
     }

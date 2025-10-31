@@ -16,6 +16,7 @@ export default function Cashier(){
   const [userCreated, setUserCreated] = useState(false)
   const [showPaymentMethods, setShowPaymentMethods] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [searchLoading, setSearchLoading] = useState(false)
 
   // Cargar todos los vuelos al iniciar
   useEffect(() => {
@@ -250,19 +251,23 @@ export default function Cashier(){
       <SearchBar 
         onResults={(flights) => {
           console.log('SearchBar results received:', flights)
+          setLoading(false)
+          setSearchLoading(false)
           setResults(flights || [])
           if (flights && flights.length > 0) {
             // Scroll suave a los resultados
             setTimeout(() => {
               window.scrollTo({ top: 500, behavior: 'smooth' })
             }, 100)
+          } else if (flights && flights.length === 0) {
+            alert('No se encontraron vuelos para esa búsqueda. Intenta con otros criterios.')
           }
         }} 
         showResultsInline={true} 
       />
 
-      {loading ? (
-        <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+      {loading && results.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '40px', marginTop: '24px' }}>
           <p>Cargando vuelos disponibles...</p>
         </div>
       ) : results.length > 0 ? (

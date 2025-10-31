@@ -66,11 +66,18 @@ export default function Cashier(){
       if (data) {
         setSearchedUser(data)
         setIsExistingCustomer(true)
+        // Si el cliente existe, buscar su información completa
+        const { data: fullUser } = await supabase
+          .from('users')
+          .select('id, email, name, role')
+          .eq('email', searchEmail.trim())
+          .maybeSingle()
+        
         setCustomerInfo({
-          name: data.name,
-          email: data.email,
-          id_number: '',
-          phone: ''
+          name: fullUser?.name || data.name,
+          email: fullUser?.email || data.email,
+          id_number: '', // El id_number no está en la tabla users, se puede llenar manualmente
+          phone: '' // El teléfono tampoco está en users, se puede llenar manualmente
         })
         setUserCreated(true)
         setShowPaymentMethods(true)
@@ -156,19 +163,26 @@ export default function Cashier(){
         return
       }
 
-      if (!customerInfo.name || !customerInfo.email || !customerInfo.id_number) {
-        alert('Por favor completa todos los campos del cliente')
+      // Asegurar que tenemos un usuario registrado
+      if (!searchedUser) {
+        alert('Por favor registra o verifica al cliente primero')
+        return
+      }
+
+      // Validar que tenemos la información mínima del cliente
+      if (!customerInfo.name || !customerInfo.email) {
+        alert('Por favor completa nombre y correo del cliente')
+        return
+      }
+
+      // El id_number es opcional si ya tenemos un usuario registrado buscado
+      if (!isExistingCustomer && !customerInfo.id_number) {
+        alert('Por favor completa el número de identificación del cliente')
         return
       }
 
       if (!paymentMethod) {
         alert('Por favor selecciona un método de pago')
-        return
-      }
-
-      // Asegurar que tenemos un usuario registrado
-      if (!searchedUser) {
-        alert('Por favor registra o verifica al cliente primero')
         return
       }
 
@@ -348,7 +362,7 @@ export default function Cashier(){
                     style={{ marginTop: '12px' }}
                     value={customerInfo.id_number}
                     onChange={e => setCustomerInfo({ ...customerInfo, id_number: e.target.value })}
-                    required
+                    required={!isExistingCustomer || !searchedUser}
                   />
                   <input 
                     className="input" 

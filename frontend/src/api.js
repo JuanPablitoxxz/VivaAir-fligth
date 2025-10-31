@@ -106,50 +106,33 @@ export const Api = {
     return data.map(c => c.name)
   },
 
-  async searchFlights(params = {}) {
-    console.log('Api.searchFlights called with params:', params)
+  async searchFlights(params) {
     let query = supabase
       .from('flights')
       .select('*')
     
     if (params.from) {
       query = query.eq('from_city', params.from)
-      console.log('Filtering by from_city:', params.from)
     }
     if (params.to) {
       query = query.eq('to_city', params.to)
-      console.log('Filtering by to_city:', params.to)
     }
-    
-    // Manejar fecha: si se especifica una fecha, filtrar por esa fecha específica
-    // Si no se especifica fecha, mostrar todos los vuelos futuros
-    const today = new Date().toISOString().split('T')[0]
-    if (params.date && params.date.trim() !== '') {
-      // Filtrar por fecha específica - mostrar TODOS los vuelos de esa fecha
+    if (params.date) {
       query = query.eq('date', params.date)
-      console.log('Filtering by specific date:', params.date, '- Will show ALL flights on this date')
-    } else {
-      // Sin fecha específica: mostrar todos los vuelos futuros (>= hoy)
-      query = query.gte('date', today)
-      console.log('No date specified, filtering by date >=', today)
     }
-    
     if (params.category) {
       query = query.eq('category', params.category)
-      console.log('Filtering by category:', params.category)
     }
+    
+    // Solo vuelos futuros
+    query = query.gte('date', new Date().toISOString().split('T')[0])
     
     const { data, error } = await query
     
-    if (error) {
-      console.error('Supabase query error:', error)
-      throw error
-    }
-    
-    console.log('Raw flight data received:', data?.length || 0, 'flights')
+    if (error) throw error
     
     const nPassengers = Number(params.passengers || 1)
-    const mapped = (data || []).map(f => ({
+    return data.map(f => ({
       id: f.id,
       airline: f.airline,
       airline_id: f.airline_id,
@@ -168,9 +151,6 @@ export const Api = {
       totalPriceCOP: f.price_cop * nPassengers,
       total_price_cop: f.price_cop * nPassengers
     }))
-    
-    console.log('Mapped flights:', mapped.length)
-    return mapped
   },
 
   async dashboard() {

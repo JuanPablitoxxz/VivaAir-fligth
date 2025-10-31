@@ -29,6 +29,8 @@ function formatDate(dateStr) {
 }
 
 export default function FlightCard({ flight, variant = 'destination', onSelect }){
+  const { isMobile, isSmallMobile } = useWindowSize()
+  
   if (variant === 'destination') {
     const hours = Math.floor(flight.durationMin / 60)
     const mins = flight.durationMin % 60

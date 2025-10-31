@@ -67,7 +67,12 @@ export default function FlightComparison({ groupedByAirline, searchParams = {}, 
   }
 
   return (
-    <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '12px', marginBottom: '32px' }}>
+    <div style={{ 
+      background: '#f8fafc', 
+      padding: isMobile ? '16px' : '24px', 
+      borderRadius: '12px', 
+      marginBottom: '32px' 
+    }}>
       {/* Tabs */}
       <div style={{ 
         display: 'flex', 

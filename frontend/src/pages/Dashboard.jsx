@@ -5,6 +5,7 @@ import SearchBar from '../components/SearchBar.jsx'
 import FlightCard from '../components/FlightCard.jsx'
 import DestinationCard from '../components/DestinationCard.jsx'
 import FlightTypeCard from '../components/FlightTypeCard.jsx'
+import { useWindowSize } from '../hooks/useWindowSize.js'
 
 export default function Dashboard(){
   const [results, setResults] = useState(null)

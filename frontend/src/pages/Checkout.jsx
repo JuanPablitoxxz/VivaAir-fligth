@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useWindowSize } from '../hooks/useWindowSize.js'
 
 export default function Checkout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { isMobile, isSmallMobile } = useWindowSize()
   const [session, setSession] = useState(() => {
     const raw = localStorage.getItem('vivaair.session')
     return raw ? JSON.parse(raw) : null
@@ -74,8 +76,8 @@ export default function Checkout() {
   return (
     <div className="card" style={{ 
       maxWidth: '600px', 
-      margin: window.innerWidth <= 768 ? '20px auto' : '40px auto',
-      padding: window.innerWidth <= 480 ? '16px' : '20px'
+      margin: isMobile ? '20px auto' : '40px auto',
+      padding: isSmallMobile ? '16px' : '20px'
     }}>
       <h2 style={{ marginTop: 0 }}>Confirmar Compra</h2>
       

@@ -106,43 +106,75 @@ export const Api = {
     return data.map(c => c.name)
   },
 
-  async searchFlights(params) {
+  async searchFlights(params = {}) {
+    console.log('=== INICIO BÚSQUEDA DE VUELOS ===')
+    console.log('Parámetros recibidos:', JSON.stringify(params, null, 2))
+    
     let query = supabase
       .from('flights')
       .select('*')
     
-    if (params.from) {
-      query = query.eq('from_city', params.from)
-    }
-    if (params.to) {
-      query = query.eq('to_city', params.to)
+    // Filtrar por origen
+    if (params.from && params.from.trim() !== '') {
+      query = query.eq('from_city', params.from.trim())
+      console.log('✓ Filtro ORIGEN aplicado:', params.from.trim())
+    } else {
+      console.log('✗ Sin filtro de origen')
     }
     
-    // Manejar fecha: si se especifica, usar solo esa fecha. Si no, mostrar futuros.
+    // Filtrar por destino
+    if (params.to && params.to.trim() !== '') {
+      query = query.eq('to_city', params.to.trim())
+      console.log('✓ Filtro DESTINO aplicado:', params.to.trim())
+    } else {
+      console.log('✗ Sin filtro de destino')
+    }
+    
+    // Manejar fecha: verificar si hay fecha válida
     const today = new Date().toISOString().split('T')[0]
-    if (params.date && params.date.trim() !== '') {
+    const hasDate = params.date && 
+                    typeof params.date === 'string' && 
+                    params.date.trim() !== '' &&
+                    params.date !== 'undefined' &&
+                    params.date !== 'null'
+    
+    if (hasDate) {
       // Si se especifica una fecha, filtrar por esa fecha específica
-      query = query.eq('date', params.date)
+      const searchDate = params.date.trim()
+      query = query.eq('date', searchDate)
+      console.log('✓ Filtro FECHA ESPECÍFICA aplicado:', searchDate)
+      console.log('  - Tipo:', typeof searchDate)
+      console.log('  - Longitud:', searchDate.length)
     } else {
       // Si no hay fecha, mostrar solo vuelos futuros
       query = query.gte('date', today)
+      console.log('✓ Filtro FECHA FUTURA aplicado (>=):', today)
     }
     
-    if (params.category) {
-      query = query.eq('category', params.category)
+    // Filtrar por categoría si se especifica
+    if (params.category && params.category.trim() !== '') {
+      query = query.eq('category', params.category.trim())
+      console.log('✓ Filtro CATEGORÍA aplicado:', params.category.trim())
     }
     
+    console.log('Ejecutando consulta a Supabase...')
     const { data, error } = await query
     
     if (error) {
-      console.error('Error en búsqueda de vuelos:', error)
+      console.error('❌ ERROR en consulta Supabase:', error)
       throw error
     }
     
-    console.log(`Búsqueda: ${params.from || 'cualquiera'} → ${params.to || 'cualquiera'}, Fecha: ${params.date || 'futuros'}, Resultados: ${data?.length || 0}`)
+    console.log(`✓ Consulta exitosa. Vuelos encontrados: ${data?.length || 0}`)
+    if (data && data.length > 0) {
+      console.log('Muestra de vuelos encontrados:')
+      data.slice(0, 3).forEach((f, idx) => {
+        console.log(`  ${idx + 1}. ${f.from_city} → ${f.to_city}, Fecha: ${f.date}, Aerolínea: ${f.airline}`)
+      })
+    }
     
     const nPassengers = Number(params.passengers || 1)
-    return (data || []).map(f => ({
+    const mapped = (data || []).map(f => ({
       id: f.id,
       airline: f.airline,
       airline_id: f.airline_id,
@@ -161,6 +193,9 @@ export const Api = {
       totalPriceCOP: f.price_cop * nPassengers,
       total_price_cop: f.price_cop * nPassengers
     }))
+    
+    console.log(`=== FIN BÚSQUEDA: ${mapped.length} vuelos mapeados ===\n`)
+    return mapped
   },
 
   async dashboard() {

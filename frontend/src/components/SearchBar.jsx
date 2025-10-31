@@ -22,24 +22,28 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
     
     setLoading(true)
     try {
-      // Preparar parámetros de búsqueda
+      // Preparar parámetros de búsqueda - limpiar y validar
       const searchParams = {
-        from: params.from,
-        to: params.to,
-        passengers: params.passengers || 1
+        from: String(params.from || '').trim(),
+        to: String(params.to || '').trim(),
+        passengers: Number(params.passengers) || 1
       }
       
-      // Incluir fecha solo si tiene valor
-      if (params.date && params.date.trim() !== '') {
-        searchParams.date = params.date
+      // Incluir fecha solo si tiene valor válido
+      const dateValue = params.date ? String(params.date).trim() : ''
+      if (dateValue && dateValue !== '' && dateValue !== 'undefined' && dateValue !== 'null') {
+        searchParams.date = dateValue
+        console.log('SearchBar: Fecha incluida en búsqueda:', dateValue)
+      } else {
+        console.log('SearchBar: Sin fecha en búsqueda')
       }
       
-      console.log('Buscando vuelos con parámetros:', searchParams)
+      console.log('SearchBar: Parámetros finales enviados a API:', JSON.stringify(searchParams, null, 2))
       
       if (showResultsInline && onResults) {
         // Modo inline (Dashboard/Cashier)
         const res = await Api.searchFlights(searchParams)
-        console.log('Resultados de búsqueda:', res)
+        console.log('SearchBar: Resultados recibidos de API:', res?.length || 0, 'vuelos')
         onResults(res || [])
         if (window.location.pathname !== '/caja') {
           window.scrollTo({ top: 600, behavior: 'smooth' })
@@ -49,7 +53,7 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
         navigate('/results', { state: { searchParams: searchParams } })
       }
     } catch (err) {
-      console.error('Error searching flights:', err)
+      console.error('SearchBar: Error en búsqueda:', err)
       alert('Error al buscar vuelos: ' + (err.message || 'Error desconocido'))
       if (showResultsInline && onResults) {
         onResults([])

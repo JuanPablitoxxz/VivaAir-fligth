@@ -17,29 +17,44 @@ export default function Dashboard(){
 
   // Redirigir según rol - debe ejecutarse inmediatamente
   useEffect(() => {
-    // Verificar sesión directamente del localStorage para evitar delays
-    const rawSession = localStorage.getItem('vivaair.session')
-    let currentSession = session
-    
-    if (!currentSession && rawSession) {
-      try {
-        currentSession = JSON.parse(rawSession)
-      } catch (e) {
-        console.error('Error parsing session:', e)
+    const checkAndRedirect = () => {
+      // Verificar sesión directamente del localStorage para evitar delays
+      const rawSession = localStorage.getItem('vivaair.session')
+      let currentSession = session
+      
+      if (!currentSession && rawSession) {
+        try {
+          currentSession = JSON.parse(rawSession)
+        } catch (e) {
+          console.error('Error parsing session:', e)
+          return
+        }
+      }
+      
+      const role = currentSession?.user?.role
+      
+      if (role === 'CAJERO') {
+        // Redirigir inmediatamente con window.location para forzar recarga
+        if (window.location.pathname !== '/caja') {
+          window.location.replace('/caja')
+        }
+        return
+      } else if (role === 'ADM') {
+        // Redirigir inmediatamente
+        if (window.location.pathname !== '/admin') {
+          window.location.replace('/admin')
+        }
+        return
       }
     }
     
-    const role = currentSession?.user?.role
+    // Ejecutar inmediatamente
+    checkAndRedirect()
     
-    if (role === 'CAJERO') {
-      // Redirigir inmediatamente
-      window.location.href = '/caja'
-      return
-    } else if (role === 'ADM') {
-      // Redirigir inmediatamente
-      window.location.href = '/admin'
-      return
-    }
+    // También verificar después de un pequeño delay para móviles
+    const timeout = setTimeout(checkAndRedirect, 100)
+    
+    return () => clearTimeout(timeout)
   }, [session])
 
   const popularDestinations = ['Cartagena', 'Medellín', 'Cali', 'Santa Marta', 'Barranquilla']

@@ -73,25 +73,50 @@ export default function FlightCard({ flight, variant = 'destination', onSelect }
   }
 
   return (
-    <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 20, alignItems: 'center' }}>
+    <div className="card" style={{ 
+      display: 'grid', 
+      gridTemplateColumns: isMobile ? '1fr' : '1fr auto', 
+      gap: isMobile ? 16 : 20, 
+      alignItems: 'center' 
+    }}>
       <div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: 8, 
+          alignItems: 'center', 
+          marginBottom: 12,
+          flexWrap: 'wrap'
+        }}>
           <span className="tag">{flight.airline}</span>
           <span className="tag">{flight.category}</span>
-          <span style={{ fontSize: '14px', color: 'var(--text-light)' }}>{flight.durationMin} min</span>
+          <span style={{ fontSize: '14px', color: 'var(--text-light)' }}>{flight.durationMin || flight.duration_min} min</span>
         </div>
-        <div style={{ marginBottom: 8, fontWeight: 700, fontSize: '18px' }}>
-          {flight.from} → {flight.to}
+        <div style={{ marginBottom: 8, fontWeight: 700, fontSize: isSmallMobile ? '16px' : '18px' }}>
+          {flight.from || flight.from_city} → {flight.to || flight.to_city}
         </div>
-        <div style={{ color: 'var(--text-light)', fontSize: 14 }}>
+        <div style={{ color: 'var(--text-light)', fontSize: isSmallMobile ? 12 : 14 }}>
           {new Date(flight.date).toLocaleDateString('es-CO', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} · {flight.time}
         </div>
       </div>
-      <div style={{ textAlign: 'right' }}>
-        <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary-dark)', marginBottom: 12 }}>
+      <div style={{ 
+        textAlign: isMobile ? 'left' : 'right',
+        marginTop: isMobile ? '12px' : '0'
+      }}>
+        <div style={{ 
+          fontSize: isSmallMobile ? '20px' : '24px', 
+          fontWeight: 800, 
+          color: 'var(--primary-dark)', 
+          marginBottom: 12 
+        }}>
           {formatCOP(flight.totalPriceCOP ?? flight.priceCOP)}
         </div>
-        <button className="btn" onClick={() => onSelect && onSelect(flight)}>Seleccionar</button>
+        <button 
+          className="btn" 
+          onClick={() => onSelect && onSelect(flight)}
+          style={{ width: isMobile ? '100%' : 'auto' }}
+        >
+          Seleccionar
+        </button>
       </div>
     </div>
   )

@@ -154,8 +154,17 @@ export default function FlightResults() {
     )
   }
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+  const isSmallMobile = typeof window !== 'undefined' && window.innerWidth <= 480
+
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px', background: '#f8fafc', minHeight: '100vh' }}>
+    <div style={{ 
+      maxWidth: '1400px', 
+      margin: '0 auto', 
+      padding: isSmallMobile ? '12px' : isMobile ? '16px' : '24px', 
+      background: '#f8fafc', 
+      minHeight: '100vh' 
+    }}>
       {/* Breadcrumb */}
       <div style={{ marginBottom: '24px' }}>
         <button className="btn-outline" onClick={() => navigate('/')} style={{ marginRight: '16px' }}>
@@ -184,7 +193,14 @@ export default function FlightResults() {
       )}
 
       {/* Botones de filtro y recomendación */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '12px', 
+        marginBottom: '24px', 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+      }}>
         <button
           onClick={() => {
             setSortBy('recomendados')
@@ -242,7 +258,10 @@ export default function FlightResults() {
         >
           Más rápidos {fastestFlight ? formatCOP(fastestFlight.priceCOP || fastestFlight.totalPriceCOP || 0) : ''}
         </button>
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ 
+          marginLeft: window.innerWidth <= 768 ? '0' : 'auto',
+          width: window.innerWidth <= 768 ? '100%' : 'auto'
+        }}>
           <button
             style={{
               background: 'transparent',
@@ -255,7 +274,9 @@ export default function FlightResults() {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              width: window.innerWidth <= 768 ? '100%' : 'auto',
+              justifyContent: 'center'
             }}
           >
             🔔 Crear alerta de precio
@@ -265,7 +286,13 @@ export default function FlightResults() {
 
       {/* Detalle del vuelo seleccionado */}
       {selectedFlight && (
-        <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginBottom: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+        <div style={{ 
+          background: 'white', 
+          borderRadius: '12px', 
+          padding: window.innerWidth <= 768 ? '16px' : '24px', 
+          marginBottom: '24px', 
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
+        }}>
           {/* IDA */}
           <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
@@ -275,7 +302,12 @@ export default function FlightResults() {
                 {new Date(selectedFlight.date).toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '16px', alignItems: 'center' }}>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr auto 1fr', 
+              gap: '16px', 
+              alignItems: 'center' 
+            }}>
               <div>
                 <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '4px' }}>
                   {selectedFlight.from || selectedFlight.from_city} → {selectedFlight.to || selectedFlight.to_city}
@@ -323,17 +355,33 @@ export default function FlightResults() {
           {/* Por ahora solo mostramos IDA para vuelos simples */}
 
           {/* Precio final y compra */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px' }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: window.innerWidth <= 768 ? 'flex-start' : 'center', 
+            marginTop: '24px',
+            flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
+            gap: window.innerWidth <= 768 ? '16px' : '0'
+          }}>
             <div>
               <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '4px' }}>Final 1 persona</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '32px', fontWeight: 800, color: '#0f172a' }}>
+                <span style={{ 
+                  fontSize: window.innerWidth <= 480 ? '24px' : '32px', 
+                  fontWeight: 800, 
+                  color: '#0f172a' 
+                }}>
                   {formatCOP(selectedFlight.priceCOP || selectedFlight.totalPriceCOP || 0)}
                 </span>
                 <span style={{ fontSize: '18px', color: '#64748b', cursor: 'pointer' }}>ℹ️</span>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px', 
+              alignItems: 'center',
+              width: window.innerWidth <= 768 ? '100%' : 'auto'
+            }}>
               <button
                 style={{
                   background: 'transparent',
@@ -356,7 +404,8 @@ export default function FlightResults() {
                   fontSize: '16px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(147, 51, 234, 0.3)'
+                  boxShadow: '0 2px 8px rgba(147, 51, 234, 0.3)',
+                  flex: window.innerWidth <= 768 ? 1 : 'none'
                 }}
               >
                 Comprar

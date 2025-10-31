@@ -33,6 +33,8 @@ export default function FlightComparison({ groupedByAirline, searchParams = {}, 
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('aerolinea')
   const airlines = Object.values(groupedByAirline)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+  const isSmallMobile = typeof window !== 'undefined' && window.innerWidth <= 480
   
   if (airlines.length === 0) {
     return null
@@ -67,18 +69,28 @@ export default function FlightComparison({ groupedByAirline, searchParams = {}, 
   return (
     <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '12px', marginBottom: '32px' }}>
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '24px', borderBottom: '2px solid #e2e8f0', marginBottom: '24px', paddingBottom: '8px' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: isMobile ? '12px' : '24px', 
+        borderBottom: '2px solid #e2e8f0', 
+        marginBottom: '24px', 
+        paddingBottom: '8px',
+        overflowX: isMobile ? 'auto' : 'visible',
+        flexWrap: isMobile ? 'nowrap' : 'wrap'
+      }}>
         <button
           onClick={() => setActiveTab('aerolinea')}
           style={{
             background: 'transparent',
             border: 'none',
             padding: '8px 0',
-            fontSize: '16px',
+            fontSize: isSmallMobile ? '12px' : isMobile ? '14px' : '16px',
             fontWeight: activeTab === 'aerolinea' ? 600 : 400,
             color: activeTab === 'aerolinea' ? '#9333ea' : '#64748b',
             borderBottom: activeTab === 'aerolinea' ? '3px solid #9333ea' : '3px solid transparent',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            minWidth: isMobile ? 'fit-content' : 'auto'
           }}
         >
           Precios por aerolínea
@@ -89,11 +101,13 @@ export default function FlightComparison({ groupedByAirline, searchParams = {}, 
             background: 'transparent',
             border: 'none',
             padding: '8px 0',
-            fontSize: '16px',
+            fontSize: isSmallMobile ? '12px' : isMobile ? '14px' : '16px',
             fontWeight: activeTab === 'fechas' ? 600 : 400,
             color: activeTab === 'fechas' ? '#9333ea' : '#64748b',
             borderBottom: activeTab === 'fechas' ? '3px solid #9333ea' : '3px solid transparent',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            minWidth: isMobile ? 'fit-content' : 'auto'
           }}
         >
           Precios +/- 3 días
@@ -104,11 +118,13 @@ export default function FlightComparison({ groupedByAirline, searchParams = {}, 
             background: 'transparent',
             border: 'none',
             padding: '8px 0',
-            fontSize: '16px',
+            fontSize: isSmallMobile ? '12px' : isMobile ? '14px' : '16px',
             fontWeight: activeTab === 'tendencia' ? 600 : 400,
             color: activeTab === 'tendencia' ? '#9333ea' : '#64748b',
             borderBottom: activeTab === 'tendencia' ? '3px solid #9333ea' : '3px solid transparent',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            minWidth: isMobile ? 'fit-content' : 'auto'
           }}
         >
           Tendencia de precios
@@ -117,8 +133,18 @@ export default function FlightComparison({ groupedByAirline, searchParams = {}, 
 
       {/* Tabla de comparación */}
       {activeTab === 'aerolinea' && (
-        <div style={{ background: 'white', borderRadius: '8px', padding: '20px', overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ 
+          background: 'white', 
+          borderRadius: '8px', 
+          padding: isMobile ? '12px' : '20px', 
+          overflowX: 'auto' 
+        }}>
+          <table style={{ 
+            width: '100%', 
+            borderCollapse: 'collapse',
+            fontSize: isSmallMobile ? '12px' : '14px',
+            minWidth: '600px'
+          }}>
             <thead>
               <tr>
                 <th style={{ textAlign: 'left', padding: '12px', fontSize: '14px', fontWeight: 600, color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Aerolínea</th>

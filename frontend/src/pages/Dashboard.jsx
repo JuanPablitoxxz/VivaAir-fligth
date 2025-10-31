@@ -15,6 +15,16 @@ export default function Dashboard(){
   })
   const navigate = useNavigate()
 
+  // Redirigir según rol
+  useEffect(() => {
+    const role = session?.user?.role
+    if (role === 'CAJERO') {
+      navigate('/caja', { replace: true })
+    } else if (role === 'ADM') {
+      navigate('/admin', { replace: true })
+    }
+  }, [session, navigate])
+
   const popularDestinations = ['Cartagena', 'Medellín', 'Cali', 'Santa Marta', 'Barranquilla']
   const handleDestinationClick = (city) => {
     // Navegar a página de resultados con comparación

@@ -15,6 +15,26 @@ export default function Cashier(){
   const [showPayment, setShowPayment] = useState(false)
   const [userCreated, setUserCreated] = useState(false)
   const [showPaymentMethods, setShowPaymentMethods] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // Cargar todos los vuelos al iniciar
+  useEffect(() => {
+    loadAllFlights()
+  }, [])
+
+  const loadAllFlights = async () => {
+    setLoading(true)
+    try {
+      // Buscar todos los vuelos disponibles (sin filtros)
+      const flights = await Api.searchFlights({})
+      setResults(flights || [])
+    } catch (err) {
+      console.error('Error loading flights:', err)
+      setResults([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleFlightSelect = (flight) => {
     setSelectedFlight(flight)
@@ -213,18 +233,33 @@ export default function Cashier(){
         <p>Busca vuelos y realiza la compra para el cliente.</p>
       </div>
 
-      <SearchBar onResults={setResults} />
+      <SearchBar onResults={(flights) => {
+        setResults(flights || [])
+      }} showResultsInline={true} />
 
-      {results.length > 0 && (
+      {loading ? (
+        <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+          <p>Cargando vuelos disponibles...</p>
+        </div>
+      ) : results.length > 0 ? (
         <section style={{ marginTop: '24px' }}>
-          <h3>Vuelos Disponibles</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0 }}>Vuelos Disponibles ({results.length})</h3>
+            <button 
+              className="btn-outline" 
+              onClick={loadAllFlights}
+              style={{ fontSize: '14px' }}
+            >
+              🔄 Mostrar todos
+            </button>
+          </div>
           <div className="results">
             {results.map(f => (
-              <div key={f.id}>
+              <div key={f.id} style={{ marginBottom: '16px' }}>
                 <FlightCard flight={f} variant="list" />
                 <button 
                   className="btn btn-primary" 
-                  style={{ marginTop: '8px' }}
+                  style={{ marginTop: '8px', width: '100%' }}
                   onClick={() => handleFlightSelect(f)}
                 >
                   Seleccionar para cliente
@@ -233,6 +268,17 @@ export default function Cashier(){
             ))}
           </div>
         </section>
+      ) : (
+        <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+          <p style={{ fontSize: '18px', color: 'var(--text-light)' }}>No hay vuelos disponibles</p>
+          <button 
+            className="btn-outline" 
+            onClick={loadAllFlights}
+            style={{ marginTop: '16px' }}
+          >
+            Recargar vuelos
+          </button>
+        </div>
       )}
 
       {showPayment && selectedFlight && (

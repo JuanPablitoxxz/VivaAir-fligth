@@ -47,15 +47,24 @@ export default function App() {
 
   const role = auth.session?.user?.role
 
-  const navItems = useMemo(() => (
-    [
-      { to: '/', label: 'Inicio' },
-      { to: '/login', label: auth.session?.user ? `${auth.session.user.name} (${role})` : 'Iniciar sesión' },
-      ...(role === 'CLIENTE' ? [{ to: '/profile', label: 'Mi Perfil' }] : []),
-      ...(role === 'ADM' ? [{ to: '/admin', label: 'Admin' }] : []),
-      ...(role === 'CAJERO' ? [{ to: '/caja', label: 'Cajero' }] : [])
-    ]
-  ), [role, auth.session])
+  const navItems = useMemo(() => {
+    const items = []
+    // Solo mostrar "Inicio" para clientes o usuarios no autenticados
+    if (!role || role === 'CLIENTE') {
+      items.push({ to: '/', label: 'Inicio' })
+    }
+    items.push({ to: '/login', label: auth.session?.user ? `${auth.session.user.name} (${role})` : 'Iniciar sesión' })
+    if (role === 'CLIENTE') {
+      items.push({ to: '/profile', label: 'Mi Perfil' })
+    }
+    if (role === 'ADM') {
+      items.push({ to: '/admin', label: 'Admin' })
+    }
+    if (role === 'CAJERO') {
+      items.push({ to: '/caja', label: 'Cajero' })
+    }
+    return items
+  }, [role, auth.session])
 
   return (
     <div className="app-container" style={{ background: brand.bg, color: brand.text }}>

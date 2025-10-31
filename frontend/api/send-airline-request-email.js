@@ -1,17 +1,24 @@
 // Serverless function para Vercel
 export default async function handler(req, res) {
+  // Asegurar headers JSON siempre
+  res.setHeader('Content-Type', 'application/json')
+  
   // Función helper para enviar JSON de forma segura
   const sendJSON = (status, data) => {
     try {
-      res.setHeader('Content-Type', 'application/json')
-      res.status(status).json(data)
+      const jsonString = JSON.stringify(data)
+      res.status(status).end(jsonString)
       return
     } catch (err) {
-      console.error('Error enviando JSON:', err)
+      console.error('Error serializando JSON:', err)
       try {
-        res.status(status).end(JSON.stringify(data))
+        res.status(status).end(JSON.stringify({
+          success: false,
+          message: 'Error serializando respuesta',
+          error: String(err).substring(0, 100)
+        }))
       } catch (e) {
-        res.status(500).end('{"success":false,"message":"Error interno"}')
+        res.status(500).end('{"success":false,"message":"Error interno fatal"}')
       }
     }
   }
@@ -129,11 +136,24 @@ export default async function handler(req, res) {
       })
     }
   } catch (error) {
+    // Asegurar que siempre devolvemos JSON, incluso en errores fatales
     console.error('Error fatal en handler:', error.message, error.stack)
-    return sendJSON(500, { 
-      success: false, 
-      message: error.message || 'Error interno del servidor',
-      error: String(error).substring(0, 200)
-    })
+    try {
+      return sendJSON(200, { 
+        success: false, 
+        message: error.message || 'Error interno del servidor',
+        simulated: true,
+        error: String(error).substring(0, 200),
+        note: 'Error en función de email'
+      })
+    } catch (finalError) {
+      // Último recurso: enviar respuesta mínima
+      try {
+        res.setHeader('Content-Type', 'application/json')
+        res.status(200).end('{"success":false,"message":"Error interno","simulated":true}')
+      } catch (e) {
+        // Ignorar si aún falla
+      }
+    }
   }
 }

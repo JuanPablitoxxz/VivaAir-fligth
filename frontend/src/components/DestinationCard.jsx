@@ -1,17 +1,17 @@
 import React from 'react'
 
-// Imágenes específicas de ciudades colombianas - usando URLs directas de Unsplash sin parámetros que puedan causar problemas
+// Imágenes específicas de ciudades colombianas - URLs actualizadas con imágenes más confiables
 const cityImages = {
-  'Bogotá': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=600&h=400',
-  'Medellín': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600&h=400',
-  'Cali': 'https://images.unsplash.com/photo-1587330979470-3585acb56371?auto=format&fit=crop&w=600&h=400',
-  'Cartagena': 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=600&h=400',
-  'Barranquilla': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=600&h=400',
-  'Bucaramanga': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?auto=format&fit=crop&w=600&h=400',
-  'Pereira': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400',
-  'Santa Marta': 'https://images.unsplash.com/photo-1539650116574-75c0c6d73a6e?auto=format&fit=crop&w=600&h=400',
-  'Cúcuta': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400',
-  'Ibagué': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400'
+  'Bogotá': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=600&h=400&q=80',
+  'Medellín': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600&h=400&q=80',
+  'Cali': 'https://images.unsplash.com/photo-1576982826104-48cc330ae4f9?auto=format&fit=crop&w=600&h=400&q=80',
+  'Cartagena': 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=600&h=400&q=80',
+  'Barranquilla': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=600&h=400&q=80',
+  'Bucaramanga': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?auto=format&fit=crop&w=600&h=400&q=80',
+  'Pereira': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400&q=80',
+  'Santa Marta': 'https://images.unsplash.com/photo-1578839948499-2b389f2004c9?auto=format&fit=crop&w=600&h=400&q=80',
+  'Cúcuta': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400&q=80',
+  'Ibagué': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400&q=80'
 }
 
 export default function DestinationCard({ city, isPopular = false, onClick }) {

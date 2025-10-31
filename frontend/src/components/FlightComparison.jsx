@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useWindowSize } from '../hooks/useWindowSize.js'
 
 function formatCOP(amount) {
   return `$ ${amount.toLocaleString('es-CO', { maximumFractionDigits: 0 })}`
@@ -33,8 +34,7 @@ export default function FlightComparison({ groupedByAirline, searchParams = {}, 
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('aerolinea')
   const airlines = Object.values(groupedByAirline)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-  const isSmallMobile = typeof window !== 'undefined' && window.innerWidth <= 480
+  const { isMobile, isSmallMobile } = useWindowSize()
   
   if (airlines.length === 0) {
     return null

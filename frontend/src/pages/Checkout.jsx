@@ -72,7 +72,11 @@ export default function Checkout() {
   }
 
   return (
-    <div className="card" style={{ maxWidth: '600px', margin: '40px auto' }}>
+    <div className="card" style={{ 
+      maxWidth: '600px', 
+      margin: window.innerWidth <= 768 ? '20px auto' : '40px auto',
+      padding: window.innerWidth <= 480 ? '16px' : '20px'
+    }}>
       <h2 style={{ marginTop: 0 }}>Confirmar Compra</h2>
       
       <div className="card" style={{ marginBottom: '24px', background: 'var(--bg-light)' }}>

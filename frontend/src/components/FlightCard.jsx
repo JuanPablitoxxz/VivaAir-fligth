@@ -1,4 +1,5 @@
 import React from 'react'
+import { useWindowSize } from '../hooks/useWindowSize.js'
 
 function formatCOP(v){
   return v.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })

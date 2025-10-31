@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import FlightComparison from '../components/FlightComparison.jsx'
 import FlightCard from '../components/FlightCard.jsx'
 import SearchBar from '../components/SearchBar.jsx'
+import { useWindowSize } from '../hooks/useWindowSize.js'
 
 function formatCOP(amount) {
   return `$ ${amount.toLocaleString('es-CO', { maximumFractionDigits: 0 })}`
@@ -154,8 +155,7 @@ export default function FlightResults() {
     )
   }
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-  const isSmallMobile = typeof window !== 'undefined' && window.innerWidth <= 480
+  const { isMobile, isSmallMobile } = useWindowSize()
 
   return (
     <div style={{ 
@@ -259,8 +259,8 @@ export default function FlightResults() {
           Más rápidos {fastestFlight ? formatCOP(fastestFlight.priceCOP || fastestFlight.totalPriceCOP || 0) : ''}
         </button>
         <div style={{ 
-          marginLeft: window.innerWidth <= 768 ? '0' : 'auto',
-          width: window.innerWidth <= 768 ? '100%' : 'auto'
+          marginLeft: isMobile ? '0' : 'auto',
+          width: isMobile ? '100%' : 'auto'
         }}>
           <button
             style={{
@@ -275,7 +275,7 @@ export default function FlightResults() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              width: window.innerWidth <= 768 ? '100%' : 'auto',
+              width: isMobile ? '100%' : 'auto',
               justifyContent: 'center'
             }}
           >
@@ -289,7 +289,7 @@ export default function FlightResults() {
         <div style={{ 
           background: 'white', 
           borderRadius: '12px', 
-          padding: window.innerWidth <= 768 ? '16px' : '24px', 
+          padding: isMobile ? '16px' : '24px', 
           marginBottom: '24px', 
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
         }}>
@@ -304,7 +304,7 @@ export default function FlightResults() {
             </div>
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr auto 1fr', 
+              gridTemplateColumns: isMobile ? '1fr' : '1fr auto 1fr', 
               gap: '16px', 
               alignItems: 'center' 
             }}>
@@ -367,7 +367,7 @@ export default function FlightResults() {
               <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '4px' }}>Final 1 persona</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ 
-                  fontSize: window.innerWidth <= 480 ? '24px' : '32px', 
+                  fontSize: isSmallMobile ? '24px' : '32px', 
                   fontWeight: 800, 
                   color: '#0f172a' 
                 }}>
@@ -380,7 +380,7 @@ export default function FlightResults() {
               display: 'flex', 
               gap: '12px', 
               alignItems: 'center',
-              width: window.innerWidth <= 768 ? '100%' : 'auto'
+              width: isMobile ? '100%' : 'auto'
             }}>
               <button
                 style={{
@@ -405,7 +405,7 @@ export default function FlightResults() {
                   fontWeight: 600,
                   cursor: 'pointer',
                   boxShadow: '0 2px 8px rgba(147, 51, 234, 0.3)',
-                  flex: window.innerWidth <= 768 ? 1 : 'none'
+                  flex: isMobile ? 1 : 'none'
                 }}
               >
                 Comprar

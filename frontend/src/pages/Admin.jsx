@@ -5,30 +5,57 @@ import Metrics from './admin/Metrics.jsx'
 
 export default function Admin(){
   const [activeTab, setActiveTab] = useState('metrics')
+  const [checking, setChecking] = useState(true)
+  const [isAuthorized, setIsAuthorized] = useState(false)
   
   // Verificar que el usuario sea ADM, si no, redirigir
   useEffect(() => {
-    const rawSession = localStorage.getItem('vivaair.session')
-    let currentSession = null
-    if (rawSession) {
+    const checkRole = () => {
       try {
-        currentSession = JSON.parse(rawSession)
-      } catch (e) {
-        console.error('Error parsing session:', e)
+        const rawSession = localStorage.getItem('vivaair.session')
+        let currentSession = null
+        if (rawSession) {
+          try {
+            currentSession = JSON.parse(rawSession)
+          } catch (e) {
+            console.error('Error parsing session:', e)
+          }
+        }
+        
+        const role = currentSession?.user?.role
+        
+        if (!role || role !== 'ADM') {
+          // Si no es ADM, redirigir
+          if (role === 'CAJERO') {
+            window.location.replace('/caja')
+          } else {
+            window.location.replace('/login')
+          }
+          return
+        }
+        
+        setIsAuthorized(true)
+        setChecking(false)
+      } catch (err) {
+        console.error('Error checking role:', err)
+        window.location.replace('/login')
       }
     }
     
-    const role = currentSession?.user?.role
-    
-    if (!role || role !== 'ADM') {
-      // Si no es ADM, redirigir
-      if (role === 'CAJERO') {
-        window.location.href = '/caja'
-      } else {
-        window.location.href = '/login'
-      }
-    }
+    checkRole()
   }, [])
+  
+  if (checking) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <p>Cargando...</p>
+      </div>
+    )
+  }
+  
+  if (!isAuthorized) {
+    return null
+  }
 
   const tabs = [
     { id: 'metrics', label: 'Métricas' },

@@ -247,9 +247,19 @@ export default function Cashier(){
         <p>Busca vuelos y realiza la compra para el cliente.</p>
       </div>
 
-      <SearchBar onResults={(flights) => {
-        setResults(flights || [])
-      }} showResultsInline={true} />
+      <SearchBar 
+        onResults={(flights) => {
+          console.log('SearchBar results received:', flights)
+          setResults(flights || [])
+          if (flights && flights.length > 0) {
+            // Scroll suave a los resultados
+            setTimeout(() => {
+              window.scrollTo({ top: 500, behavior: 'smooth' })
+            }, 100)
+          }
+        }} 
+        showResultsInline={true} 
+      />
 
       {loading ? (
         <div className="card" style={{ textAlign: 'center', padding: '40px' }}>

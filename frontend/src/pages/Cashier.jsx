@@ -13,10 +13,19 @@ export default function Cashier(){
   const [searchedUser, setSearchedUser] = useState(null)
   const [paymentMethod, setPaymentMethod] = useState('')
   const [showPayment, setShowPayment] = useState(false)
+  const [userCreated, setUserCreated] = useState(false)
+  const [showPaymentMethods, setShowPaymentMethods] = useState(false)
 
   const handleFlightSelect = (flight) => {
     setSelectedFlight(flight)
     setShowPayment(true)
+    setShowPaymentMethods(false)
+    setUserCreated(false)
+    setSearchedUser(null)
+    setIsExistingCustomer(false)
+    setCustomerInfo({ name: '', email: '', id_number: '', phone: '' })
+    setSearchEmail('')
+    setPaymentMethod('')
   }
 
   const searchCustomer = async () => {
@@ -43,7 +52,12 @@ export default function Cashier(){
           id_number: '',
           phone: ''
         })
-        alert(`Cliente encontrado: ${data.name}`)
+        setUserCreated(true)
+        setShowPaymentMethods(true)
+        // Mostrar mensaje de éxito
+        setTimeout(() => {
+          alert(`✓ Cliente encontrado: ${data.name}`)
+        }, 100)
       } else {
         setSearchedUser(null)
         setIsExistingCustomer(false)
@@ -53,7 +67,8 @@ export default function Cashier(){
           id_number: '',
           phone: ''
         })
-        alert('Cliente no encontrado. Puedes crear uno nuevo con los datos del formulario.')
+        setUserCreated(false)
+        setShowPaymentMethods(false)
       }
     } catch (err) {
       console.error('Error searching customer:', err)
@@ -101,10 +116,16 @@ export default function Cashier(){
 
       setSearchedUser(newUser)
       setIsExistingCustomer(true)
-      alert(`Usuario creado exitosamente. Contraseña temporal: ${tempPassword}\n\nEl cliente podrá cambiar su contraseña al iniciar sesión.`)
+      setUserCreated(true)
+      setShowPaymentMethods(true)
+      
+      // Mostrar mensaje de éxito
+      alert(`✓ Usuario creado con éxito!\n\nCliente: ${newUser.name}\nEmail: ${newUser.email}\n\nContraseña temporal: ${tempPassword}\n\nEl cliente podrá cambiar su contraseña al iniciar sesión.`)
     } catch (err) {
       console.error('Error creating customer:', err)
       alert('Error al crear usuario: ' + err.message)
+      setUserCreated(false)
+      setShowPaymentMethods(false)
     }
   }
 
@@ -125,40 +146,13 @@ export default function Cashier(){
         return
       }
 
-      let user = searchedUser
-
-      // Si no hay usuario buscado, buscar o crear
-      if (!user) {
-        const { data: foundUser } = await supabase
-          .from('users')
-          .select('id')
-          .eq('email', customerInfo.email)
-          .maybeSingle()
-
-        if (!foundUser) {
-          // Crear usuario cliente
-          const tempPassword = Math.random().toString(36).slice(-8)
-          const encoder = new TextEncoder()
-          const hash = await crypto.subtle.digest('SHA-256', encoder.encode(tempPassword))
-          const hashed = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
-          
-          const { data: newUser, error: createError } = await supabase
-            .from('users')
-            .insert([{
-              email: customerInfo.email,
-              password_hash: hashed,
-              name: customerInfo.name,
-              role: 'CLIENTE'
-            }])
-            .select()
-            .single()
-
-          if (createError) throw createError
-          user = newUser
-        } else {
-          user = foundUser
-        }
+      // Asegurar que tenemos un usuario registrado
+      if (!searchedUser) {
+        alert('Por favor registra o verifica al cliente primero')
+        return
       }
+
+      const user = searchedUser
 
       // Crear reserva
       const { data: reservation } = await supabase
@@ -194,7 +188,9 @@ export default function Cashier(){
           total_amount: reservation.total_price
         }])
 
-      alert(`✅ Pago procesado exitosamente!\n\nTicket: ${reservation.ticket_number}\nCliente: ${customerInfo.name}\n\nEl ticket ha sido registrado en la cuenta del cliente.`)
+      alert(`✅ Pago procesado exitosamente!\n\nTicket: ${reservation.ticket_number}\nCliente: ${customerInfo.name}\nMétodo: ${paymentMethod}\n\nEl ticket ha sido registrado en la cuenta del cliente y aparecerá en su perfil.`)
+      
+      // Resetear todo
       setShowPayment(false)
       setSelectedFlight(null)
       setResults([])
@@ -203,6 +199,8 @@ export default function Cashier(){
       setSearchedUser(null)
       setIsExistingCustomer(false)
       setPaymentMethod('')
+      setUserCreated(false)
+      setShowPaymentMethods(false)
     } catch (err) {
       alert('Error: ' + err.message)
     }
@@ -240,126 +238,163 @@ export default function Cashier(){
       {showPayment && selectedFlight && (
         <div className="modal-overlay" onClick={() => setShowPayment(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2>Procesar Pago</h2>
+            <h2>Registrar Cliente y Procesar Pago</h2>
             
-            {/* Búsqueda de Cliente */}
+            {/* Información del Vuelo */}
             <div style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-light)', borderRadius: '8px' }}>
-              <h3 style={{ marginTop: 0, marginBottom: '12px', fontSize: '16px' }}>Buscar Cliente Existente</h3>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  className="input"
-                  type="email"
-                  placeholder="Buscar por correo electrónico"
-                  value={searchEmail}
-                  onChange={e => setSearchEmail(e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <button className="btn-outline" onClick={searchCustomer}>
-                  🔍 Buscar
-                </button>
-              </div>
-              {searchedUser && (
-                <div style={{ marginTop: '12px', padding: '12px', background: 'white', borderRadius: '4px', border: '2px solid var(--primary)' }}>
-                  <p style={{ margin: 0, fontWeight: 600 }}>✓ Cliente encontrado: {searchedUser.name}</p>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--text-light)' }}>{searchedUser.email}</p>
+              <h3 style={{ marginTop: 0, marginBottom: '8px', fontSize: '16px' }}>Vuelo Seleccionado</h3>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}>
+                <strong>{selectedFlight.from || selectedFlight.from_city} → {selectedFlight.to || selectedFlight.to_city}</strong>
+              </p>
+              <p style={{ margin: '4px 0', fontSize: '14px', color: 'var(--text-light)' }}>
+                {selectedFlight.airline} · {new Date(selectedFlight.date).toLocaleDateString('es-CO')} · {selectedFlight.time}
+              </p>
+              <p style={{ margin: '8px 0 0 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-dark)' }}>
+                Total: ${(selectedFlight.totalPriceCOP || selectedFlight.priceCOP).toLocaleString('es-CO')} COP
+              </p>
+            </div>
+
+            {/* Paso 1: Búsqueda/Registro de Cliente */}
+            {!userCreated && (
+              <>
+                {/* Búsqueda de Cliente */}
+                <div style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-light)', borderRadius: '8px' }}>
+                  <h3 style={{ marginTop: 0, marginBottom: '12px', fontSize: '16px' }}>Paso 1: Buscar Cliente Existente</h3>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      className="input"
+                      type="email"
+                      placeholder="Buscar por correo electrónico"
+                      value={searchEmail}
+                      onChange={e => setSearchEmail(e.target.value)}
+                      style={{ flex: 1 }}
+                    />
+                    <button className="btn-outline" onClick={searchCustomer}>
+                      🔍 Buscar
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* Información del Cliente */}
-            <div style={{ marginBottom: '24px' }}>
-              <h3>Información del Cliente {isExistingCustomer && <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 'normal' }}>(Existente)</span>}</h3>
-              <input 
-                className="input" 
-                placeholder="Nombre completo *"
-                value={customerInfo.name}
-                onChange={e => setCustomerInfo({ ...customerInfo, name: e.target.value })}
-                disabled={isExistingCustomer && searchedUser}
-                required
-              />
-              <input
-                className="input" 
-                type="email"
-                placeholder="Correo electrónico *"
-                style={{ marginTop: '12px' }}
-                value={customerInfo.email}
-                onChange={e => setCustomerInfo({ ...customerInfo, email: e.target.value })}
-                disabled={isExistingCustomer && searchedUser}
-                required
-              />
-              <input 
-                className="input" 
-                placeholder="Número de identificación *"
-                style={{ marginTop: '12px' }}
-                value={customerInfo.id_number}
-                onChange={e => setCustomerInfo({ ...customerInfo, id_number: e.target.value })}
-                required
-              />
-              <input 
-                className="input" 
-                placeholder="Teléfono (opcional)"
-                style={{ marginTop: '12px' }}
-                value={customerInfo.phone}
-                onChange={e => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
-              />
-              
-              {!isExistingCustomer && !searchedUser && (
-                <button 
-                  className="btn-outline" 
-                  onClick={createCustomer}
-                  style={{ marginTop: '12px', width: '100%' }}
-                  disabled={!customerInfo.name || !customerInfo.email || !customerInfo.id_number}
-                >
-                  ➕ Crear Nuevo Usuario
-                </button>
-              )}
-            </div>
+                {/* Información del Cliente */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3>Paso 2: Información del Cliente {isExistingCustomer && searchedUser && <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 'normal' }}>(Existente)</span>}</h3>
+                  <input 
+                    className="input" 
+                    placeholder="Nombre completo *"
+                    value={customerInfo.name}
+                    onChange={e => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                    disabled={isExistingCustomer && searchedUser}
+                    required
+                  />
+                  <input
+                    className="input" 
+                    type="email"
+                    placeholder="Correo electrónico *"
+                    style={{ marginTop: '12px' }}
+                    value={customerInfo.email}
+                    onChange={e => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                    disabled={isExistingCustomer && searchedUser}
+                    required
+                  />
+                  <input 
+                    className="input" 
+                    placeholder="Número de identificación *"
+                    style={{ marginTop: '12px' }}
+                    value={customerInfo.id_number}
+                    onChange={e => setCustomerInfo({ ...customerInfo, id_number: e.target.value })}
+                    required
+                  />
+                  <input 
+                    className="input" 
+                    placeholder="Teléfono (opcional)"
+                    style={{ marginTop: '12px' }}
+                    value={customerInfo.phone}
+                    onChange={e => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                  />
+                  
+                  {!isExistingCustomer && !searchedUser && (
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={createCustomer}
+                      style={{ marginTop: '12px', width: '100%' }}
+                      disabled={!customerInfo.name || !customerInfo.email || !customerInfo.id_number}
+                    >
+                      ➕ Crear Usuario Cliente
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
 
-            <div style={{ marginBottom: '24px' }}>
-              <h3>Método de Pago</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                <button
-                  className={paymentMethod === 'tarjeta' ? 'btn' : 'btn-outline'}
-                  onClick={() => setPaymentMethod('tarjeta')}
-                >
-                  💳 Tarjeta
-                </button>
-                <button
-                  className={paymentMethod === 'efectivo' ? 'btn' : 'btn-outline'}
-                  onClick={() => setPaymentMethod('efectivo')}
-                >
-                  💵 Efectivo
-                </button>
-                <button
-                  className={paymentMethod === 'transferencia_qr' ? 'btn' : 'btn-outline'}
-                  onClick={() => setPaymentMethod('transferencia_qr')}
-                >
-                  📱 QR
-                </button>
-                <button
-                  className={paymentMethod === 'transferencia' ? 'btn' : 'btn-outline'}
-                  onClick={() => setPaymentMethod('transferencia')}
-                >
-                  🔄 Transferencia Bancaria
-                </button>
+            {/* Mensaje de usuario creado */}
+            {userCreated && searchedUser && (
+              <div style={{ marginBottom: '24px', padding: '16px', background: '#d1fae5', borderRadius: '8px', border: '2px solid #10b981' }}>
+                <p style={{ margin: 0, fontWeight: 600, color: '#065f46' }}>
+                  ✓ {isExistingCustomer ? 'Cliente verificado' : 'Usuario creado con éxito'}
+                </p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#047857' }}>
+                  {searchedUser.name} ({searchedUser.email})
+                </p>
               </div>
-            </div>
+            )}
 
-            <div style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-light)', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span>Total a pagar:</span>
-                <strong>${(selectedFlight.totalPriceCOP || selectedFlight.priceCOP).toLocaleString('es-CO')} COP</strong>
+            {/* Paso 3: Métodos de Pago - Solo mostrar después de crear/verificar usuario */}
+            {showPaymentMethods && userCreated && searchedUser && (
+              <div style={{ marginBottom: '24px' }}>
+                <h3>Paso 3: Método de Pago</h3>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                  gap: '12px',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  padding: '8px',
+                  border: '1px solid var(--muted)',
+                  borderRadius: '8px'
+                }}>
+                  <button
+                    className={paymentMethod === 'tarjeta' ? 'btn' : 'btn-outline'}
+                    onClick={() => setPaymentMethod('tarjeta')}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    💳 Tarjeta
+                  </button>
+                  <button
+                    className={paymentMethod === 'efectivo' ? 'btn' : 'btn-outline'}
+                    onClick={() => setPaymentMethod('efectivo')}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    💵 Efectivo
+                  </button>
+                  <button
+                    className={paymentMethod === 'transferencia_qr' ? 'btn' : 'btn-outline'}
+                    onClick={() => setPaymentMethod('transferencia_qr')}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    📱 QR
+                  </button>
+                  <button
+                    className={paymentMethod === 'transferencia' ? 'btn' : 'btn-outline'}
+                    onClick={() => setPaymentMethod('transferencia')}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    🔄 Transferencia
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            <button 
-              className="btn btn-primary" 
-              onClick={processPayment}
-              disabled={!customerInfo.name || !customerInfo.email || !paymentMethod}
-              style={{ width: '100%' }}
-            >
-              Procesar Pago y Generar Factura
-            </button>
+            {/* Botón de Procesar Pago - Solo mostrar después de seleccionar método de pago */}
+            {showPaymentMethods && userCreated && searchedUser && (
+              <button 
+                className="btn btn-primary" 
+                onClick={processPayment}
+                disabled={!paymentMethod}
+                style={{ width: '100%', marginTop: '16px' }}
+              >
+                {paymentMethod ? 'Procesar Pago y Generar Factura' : 'Selecciona un método de pago'}
+              </button>
+            )}
           </div>
         </div>
       )}

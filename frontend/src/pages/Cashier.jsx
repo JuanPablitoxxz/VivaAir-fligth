@@ -18,47 +18,32 @@ export default function Cashier(){
   const [loading, setLoading] = useState(true)
   const [searchLoading, setSearchLoading] = useState(false)
 
-  const [checking, setChecking] = useState(true)
-  const [isAuthorized, setIsAuthorized] = useState(false)
-  
   // Verificar que el usuario sea CAJERO, si no, redirigir
   useEffect(() => {
-    const checkRole = () => {
+    const rawSession = localStorage.getItem('vivaair.session')
+    let currentSession = null
+    if (rawSession) {
       try {
-        const rawSession = localStorage.getItem('vivaair.session')
-        let currentSession = null
-        if (rawSession) {
-          try {
-            currentSession = JSON.parse(rawSession)
-          } catch (e) {
-            console.error('Error parsing session:', e)
-          }
-        }
-        
-        const role = currentSession?.user?.role
-        
-        if (!role || role !== 'CAJERO') {
-          // Si no es CAJERO, redirigir
-          if (role === 'ADM') {
-            window.location.replace('/admin')
-          } else {
-            window.location.replace('/login')
-          }
-          return
-        }
-        
-        setIsAuthorized(true)
-        setChecking(false)
-        
-        // Si es CAJERO, cargar vuelos
-        loadAllFlights()
-      } catch (err) {
-        console.error('Error checking role:', err)
-        window.location.replace('/login')
+        currentSession = JSON.parse(rawSession)
+      } catch (e) {
+        console.error('Error parsing session:', e)
       }
     }
     
-    checkRole()
+    const role = currentSession?.user?.role
+    
+    if (!role || role !== 'CAJERO') {
+      // Si no es CAJERO, redirigir
+      if (role === 'ADM') {
+        window.location.href = '/admin'
+      } else {
+        window.location.href = '/login'
+      }
+      return
+    }
+    
+    // Si es CAJERO, cargar vuelos
+    loadAllFlights()
   }, [])
 
   const loadAllFlights = async () => {
@@ -279,18 +264,6 @@ export default function Cashier(){
     } catch (err) {
       alert('Error: ' + err.message)
     }
-  }
-
-  if (checking) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <p>Cargando...</p>
-      </div>
-    )
-  }
-  
-  if (!isAuthorized) {
-    return null
   }
 
   return (

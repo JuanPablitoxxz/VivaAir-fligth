@@ -16,16 +16,7 @@ export default function Login({ onLogin }){
     try {
       const res = await Api.login(email, password)
       onLogin(res)
-      
-      // Redirigir según el rol del usuario
-      const role = res?.user?.role
-      if (role === 'CAJERO') {
-        navigate('/caja', { replace: true })
-      } else if (role === 'ADM') {
-        navigate('/admin', { replace: true })
-      } else {
-        navigate('/', { replace: true })
-      }
+      navigate('/')
     } catch (err) {
       console.error('Login error details:', err)
       setError(err.message || 'Credenciales inválidas')

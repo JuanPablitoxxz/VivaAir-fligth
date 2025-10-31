@@ -340,7 +340,7 @@ export default function Cashier(){
                   className={paymentMethod === 'transferencia' ? 'btn' : 'btn-outline'}
                   onClick={() => setPaymentMethod('transferencia')}
                 >
-                  🔄 Transferencia
+                  🔄 Transferencia Bancaria
                 </button>
               </div>
             </div>

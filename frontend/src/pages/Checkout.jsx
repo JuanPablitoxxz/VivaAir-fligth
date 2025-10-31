@@ -43,14 +43,15 @@ export default function Checkout() {
         .select()
         .single()
 
-      // Crear pago
+      // Crear pago (PSE simulado siempre se marca como completado en simulación)
+      const paymentStatus = formData.paymentMethod === 'pse' ? 'pendiente' : 'completado'
       await supabase
         .from('payments')
         .insert([{
           reservation_id: reservation.id,
           amount: reservation.total_price,
-          payment_method: formData.paymentMethod,
-          status: 'completado'
+          payment_method: formData.paymentMethod === 'pse' ? 'transferencia' : formData.paymentMethod,
+          status: paymentStatus
         }])
 
       // Generar factura
@@ -90,18 +91,56 @@ export default function Checkout() {
         >
           <option value="">Selecciona método</option>
           <option value="tarjeta">Tarjeta de Crédito/Débito</option>
-          <option value="transferencia">Transferencia Bancaria</option>
+          <option value="pse">PSE - Pago Seguro en Línea</option>
         </select>
       </div>
 
       {formData.paymentMethod === 'tarjeta' && (
         <div style={{ marginBottom: '24px' }}>
-          <input className="input" placeholder="Número de tarjeta" style={{ marginBottom: '12px' }} />
-          <input className="input" placeholder="Nombre en tarjeta" style={{ marginBottom: '12px' }} />
+          <input 
+            className="input" 
+            placeholder="Número de tarjeta" 
+            style={{ marginBottom: '12px' }}
+            value={formData.cardNumber}
+            onChange={e => setFormData({ ...formData, cardNumber: e.target.value })}
+            maxLength={19}
+          />
+          <input 
+            className="input" 
+            placeholder="Nombre en tarjeta" 
+            style={{ marginBottom: '12px' }}
+            value={formData.cardName}
+            onChange={e => setFormData({ ...formData, cardName: e.target.value })}
+          />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <input className="input" placeholder="MM/AA" />
-            <input className="input" placeholder="CVV" />
+            <input 
+              className="input" 
+              placeholder="MM/AA" 
+              value={formData.expiryDate}
+              onChange={e => setFormData({ ...formData, expiryDate: e.target.value })}
+              maxLength={5}
+            />
+            <input 
+              className="input" 
+              placeholder="CVV" 
+              type="password"
+              value={formData.cvv}
+              onChange={e => setFormData({ ...formData, cvv: e.target.value })}
+              maxLength={4}
+            />
           </div>
+        </div>
+      )}
+
+      {formData.paymentMethod === 'pse' && (
+        <div style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-light)', borderRadius: '8px' }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-light)', margin: '0 0 12px 0' }}>
+            PSE - Pago Seguro en Línea
+          </p>
+          <p style={{ fontSize: '12px', color: 'var(--text-light)', margin: 0 }}>
+            Al confirmar la compra, serás redirigido al sistema PSE para completar el pago de forma segura.
+            Esta es una simulación. En producción, se integraría con el sistema PSE real.
+          </p>
         </div>
       )}
 

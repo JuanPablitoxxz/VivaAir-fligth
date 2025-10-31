@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { downloadTicketPDF } from '../utils/ticketGenerator.js'
 
 export default function Profile() {
   const [session, setSession] = useState(JSON.parse(localStorage.getItem('vivaair.session') || 'null'))
@@ -37,31 +38,11 @@ export default function Profile() {
   }
 
   const downloadTicket = (reservation) => {
-    const ticketContent = `
-TICKET DE VUELO - VivaAir
-=========================
-Número de Ticket: ${reservation.ticket_number}
-Fecha de Emisión: ${new Date(reservation.created_at).toLocaleDateString('es-CO')}
-
-Pasajero: ${session.user.name}
-Email: ${session.user.email}
-
-Vuelo: ${reservation.flights?.from_city || 'N/A'} → ${reservation.flights?.to_city || 'N/A'}
-Fecha: ${reservation.flights?.date || 'N/A'}
-Hora: ${reservation.flights?.time || 'N/A'}
-Aerolínea: ${reservation.flights?.airline || 'N/A'}
-Pasajeros: ${reservation.passengers}
-
-Total Pagado: $${reservation.total_price.toLocaleString('es-CO')} COP
-Estado: ${reservation.status.toUpperCase()}
-    `.trim()
-    
-    const blob = new Blob([ticketContent], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `ticket-${reservation.ticket_number}.txt`
-    a.click()
+    if (reservation.flights) {
+      downloadTicketPDF(reservation, reservation.flights, session.user)
+    } else {
+      alert('Error: No se pudo cargar la información del vuelo')
+    }
   }
 
   return (

@@ -15,15 +15,32 @@ export default function Dashboard(){
   })
   const navigate = useNavigate()
 
-  // Redirigir según rol
+  // Redirigir según rol - debe ejecutarse inmediatamente
   useEffect(() => {
-    const role = session?.user?.role
-    if (role === 'CAJERO') {
-      navigate('/caja', { replace: true })
-    } else if (role === 'ADM') {
-      navigate('/admin', { replace: true })
+    // Verificar sesión directamente del localStorage para evitar delays
+    const rawSession = localStorage.getItem('vivaair.session')
+    let currentSession = session
+    
+    if (!currentSession && rawSession) {
+      try {
+        currentSession = JSON.parse(rawSession)
+      } catch (e) {
+        console.error('Error parsing session:', e)
+      }
     }
-  }, [session, navigate])
+    
+    const role = currentSession?.user?.role
+    
+    if (role === 'CAJERO') {
+      // Redirigir inmediatamente
+      window.location.href = '/caja'
+      return
+    } else if (role === 'ADM') {
+      // Redirigir inmediatamente
+      window.location.href = '/admin'
+      return
+    }
+  }, [session])
 
   const popularDestinations = ['Cartagena', 'Medellín', 'Cali', 'Santa Marta', 'Barranquilla']
   const handleDestinationClick = (city) => {
@@ -48,6 +65,26 @@ export default function Dashboard(){
         } 
       } 
     })
+  }
+
+  // Si es CAJERO o ADM, no renderizar nada mientras redirige
+  const rawSession = localStorage.getItem('vivaair.session')
+  let currentSession = session
+  if (!currentSession && rawSession) {
+    try {
+      currentSession = JSON.parse(rawSession)
+    } catch (e) {
+      // Ignorar error
+    }
+  }
+  const role = currentSession?.user?.role
+  
+  if (role === 'CAJERO' || role === 'ADM') {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <p>Redirigiendo...</p>
+      </div>
+    )
   }
 
   return (

@@ -18,8 +18,31 @@ export default function Cashier(){
   const [loading, setLoading] = useState(true)
   const [searchLoading, setSearchLoading] = useState(false)
 
-  // Cargar todos los vuelos al iniciar
+  // Verificar que el usuario sea CAJERO, si no, redirigir
   useEffect(() => {
+    const rawSession = localStorage.getItem('vivaair.session')
+    let currentSession = null
+    if (rawSession) {
+      try {
+        currentSession = JSON.parse(rawSession)
+      } catch (e) {
+        console.error('Error parsing session:', e)
+      }
+    }
+    
+    const role = currentSession?.user?.role
+    
+    if (!role || role !== 'CAJERO') {
+      // Si no es CAJERO, redirigir
+      if (role === 'ADM') {
+        window.location.href = '/admin'
+      } else {
+        window.location.href = '/login'
+      }
+      return
+    }
+    
+    // Si es CAJERO, cargar vuelos
     loadAllFlights()
   }, [])
 
@@ -27,7 +50,9 @@ export default function Cashier(){
     setLoading(true)
     try {
       // Buscar todos los vuelos disponibles (sin filtros)
+      // Usar objeto vacío para que la API devuelva todos los vuelos futuros
       const flights = await Api.searchFlights({})
+      console.log('Cashier: Vuelos cargados:', flights?.length || 0)
       setResults(flights || [])
     } catch (err) {
       console.error('Error loading flights:', err)

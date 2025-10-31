@@ -26,7 +26,7 @@ export default function FlightResults() {
   })
 
   useEffect(() => {
-    if (searchParams.from && searchParams.to || searchParams.category || searchParams.to) {
+    if ((searchParams.from && searchParams.to) || searchParams.category || searchParams.to) {
       loadFlights()
     } else {
       setLoading(false)

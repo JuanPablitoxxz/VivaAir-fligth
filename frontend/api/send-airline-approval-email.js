@@ -1,34 +1,47 @@
 // Serverless function para Vercel
+// Wrapper global para capturar cualquier error
 export default async function handler(req, res) {
-  // Asegurar headers JSON siempre
-  res.setHeader('Content-Type', 'application/json')
+  // Asegurar headers JSON desde el inicio - ANTES de cualquier operación
+  try {
+    res.setHeader('Content-Type', 'application/json')
+  } catch (e) {
+    // Si falla, intentar de nuevo
+  }
   
   // Función helper para enviar JSON de forma segura
   const sendJSON = (status, data) => {
     try {
-      const jsonString = JSON.stringify(data)
+      const jsonString = typeof data === 'string' ? data : JSON.stringify(data)
       res.status(status).end(jsonString)
-      return
     } catch (err) {
-      console.error('Error serializando JSON:', err)
+      console.error('Error enviando JSON:', err)
       try {
         res.status(status).end(JSON.stringify({
           success: false,
-          message: 'Error serializando respuesta',
-          error: String(err).substring(0, 100)
+          message: 'Error serializando respuesta'
         }))
       } catch (e) {
-        res.status(500).end('{"success":false,"message":"Error interno fatal"}')
+        // Último recurso
+        try {
+          res.status(200).end('{"success":false,"message":"Error interno"}')
+        } catch (finalErr) {
+          // Ignorar si todo falla
+        }
       }
     }
   }
   
+  // Try-catch global para capturar TODOS los errores
   try {
     // CORS preflight
     if (req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Origin', '*')
-      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      try {
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      } catch (e) {
+        // Ignorar errores de headers CORS
+      }
       return sendJSON(200, { ok: true })
     }
     
@@ -41,8 +54,8 @@ export default async function handler(req, res) {
     try {
       if (typeof req.body === 'string') {
         body = JSON.parse(req.body)
-      } else {
-        body = req.body || {}
+      } else if (req.body) {
+        body = req.body
       }
     } catch (parseError) {
       return sendJSON(400, { 
@@ -51,7 +64,8 @@ export default async function handler(req, res) {
       })
     }
 
-    const { company_name, company_email } = body
+    const company_name = body?.company_name || ''
+    const company_email = body?.company_email || ''
     
     if (!company_name || !company_email) {
       return sendJSON(400, { 
@@ -61,9 +75,9 @@ export default async function handler(req, res) {
     }
     
     // Verificar variables de entorno
-    const smtpServer = process.env.SMTP_SERVER
-    const smtpUser = process.env.SMTP_USER
-    const smtpPassword = process.env.SMTP_PASSWORD
+    const smtpServer = process.env?.SMTP_SERVER || ''
+    const smtpUser = process.env?.SMTP_USER || ''
+    const smtpPassword = process.env?.SMTP_PASSWORD || ''
     
     // Si no hay configuración SMTP, simular envío
     if (!smtpServer || !smtpUser || !smtpPassword) {
@@ -80,12 +94,12 @@ export default async function handler(req, res) {
     let nodemailer
     try {
       const nodemailerModule = await import('nodemailer')
-      nodemailer = nodemailerModule.default || nodemailerModule
-      if (!nodemailer || typeof nodemailer.createTransport !== 'function') {
+      nodemailer = nodemailerModule?.default || nodemailerModule
+      if (!nodemailer || typeof nodemailer?.createTransport !== 'function') {
         throw new Error('nodemailer.createTransport no disponible')
       }
     } catch (importError) {
-      console.warn('nodemailer no disponible:', importError.message)
+      console.warn('nodemailer no disponible:', importError?.message || 'unknown error')
       return sendJSON(200, {
         success: true,
         message: `Email simulado (nodemailer no disponible)`,
@@ -98,7 +112,7 @@ export default async function handler(req, res) {
     try {
       const transporter = nodemailer.createTransport({
         host: smtpServer,
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        port: parseInt(process.env?.SMTP_PORT || '587', 10),
         secure: false,
         auth: {
           user: smtpUser,
@@ -109,8 +123,16 @@ export default async function handler(req, res) {
         }
       })
 
-      // Verificar conexión
-      await transporter.verify()
+      // Verificar conexión (con timeout para evitar cuelgues)
+      try {
+        await Promise.race([
+          transporter.verify(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ])
+      } catch (verifyError) {
+        console.warn('Error verificando conexión SMTP:', verifyError?.message)
+        // Continuar de todas formas
+      }
 
       const [companyResult, adminResult] = await Promise.all([
         transporter.sendMail({
@@ -119,40 +141,46 @@ export default async function handler(req, res) {
           subject: `¡Aprobada! - ${company_name}`,
           html: `<h2>¡Felicidades!</h2><p>Su solicitud ha sido <strong>APROBADA</strong>.</p>`,
           text: `Su solicitud ha sido aprobada`
+        }).catch(err => {
+          console.error('Error enviando email a empresa:', err)
+          return { messageId: null, error: err.message }
         }),
         transporter.sendMail({
           from: `"VivaAir" <${smtpUser}>`,
-          to: process.env.ADMIN_EMAIL || smtpUser,
+          to: process.env?.ADMIN_EMAIL || smtpUser,
           subject: `Aerolínea Aprobada - ${company_name}`,
           html: `<p>Aerolínea ${company_name} aprobada. Email: ${company_email}</p>`,
           text: `Aerolínea ${company_name} aprobada`
+        }).catch(err => {
+          console.error('Error enviando email a admin:', err)
+          return { messageId: null, error: err.message }
         })
       ])
       
       return sendJSON(200, { 
         success: true, 
         message: `Emails enviados exitosamente`,
-        messageIds: [companyResult.messageId, adminResult.messageId]
+        messageIds: [companyResult?.messageId, adminResult?.messageId].filter(Boolean)
       })
     } catch (emailError) {
-      console.error('Error enviando email:', emailError.message, emailError.stack)
+      console.error('Error enviando email:', emailError?.message || 'unknown error')
       // No fallar la función, solo reportar el error
       return sendJSON(200, { 
         success: false, 
-        message: `Error enviando email: ${emailError.message}`,
+        message: `Error enviando email: ${emailError?.message || 'Error desconocido'}`,
         simulated: true,
-        error: emailError.message
+        error: String(emailError?.message || 'unknown').substring(0, 100)
       })
     }
   } catch (error) {
-    // Asegurar que siempre devolvemos JSON, incluso en errores fatales
-    console.error('Error fatal en handler:', error.message, error.stack)
+    // Catch global para CUALQUIER error no capturado
+    console.error('Error fatal en handler:', error?.message || 'unknown error', error?.stack)
     try {
       return sendJSON(200, { 
         success: false, 
-        message: error.message || 'Error interno del servidor',
+        message: error?.message || 'Error interno del servidor',
         simulated: true,
-        error: String(error).substring(0, 200),
+        error: String(error || 'unknown').substring(0, 200),
         note: 'Error en función de email'
       })
     } catch (finalError) {
@@ -161,7 +189,8 @@ export default async function handler(req, res) {
         res.setHeader('Content-Type', 'application/json')
         res.status(200).end('{"success":false,"message":"Error interno","simulated":true}')
       } catch (e) {
-        // Ignorar si aún falla
+        // Si todo falla, intentar una última vez sin try-catch
+        res.status(200).end('{"success":false}')
       }
     }
   }

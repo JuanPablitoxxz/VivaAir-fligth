@@ -348,15 +348,18 @@ body{
   height: 220px;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
 }
 .destination-card-image{
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s;
+  display: block;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
 }
 .destination-card:hover .destination-card-image{
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 .destination-card-image-fallback{
   width: 100%;

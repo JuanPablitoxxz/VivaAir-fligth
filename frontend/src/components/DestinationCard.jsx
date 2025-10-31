@@ -1,17 +1,17 @@
 import React from 'react'
 
-// Imágenes específicas y acordes a cada ciudad colombiana
+// Imágenes específicas y acordes a cada ciudad colombiana - URLs mejoradas con parámetros de calidad
 const cityImages = {
-  'Bogotá': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400&h=300&fit=crop',
-  'Medellín': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop',
-  'Cali': 'https://images.unsplash.com/photo-1587330979470-3585acb56371?w=400&h=300&fit=crop',
-  'Cartagena': 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=400&h=300&fit=crop',
-  'Barranquilla': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&h=300&fit=crop',
-  'Bucaramanga': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=300&fit=crop',
-  'Pereira': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-  'Santa Marta': 'https://images.unsplash.com/photo-1539650116574-75c0c6d73a6e?w=400&h=300&fit=crop',
-  'Cúcuta': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-  'Ibagué': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop'
+  'Bogotá': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=600&h=400&fit=crop&q=80',
+  'Medellín': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&h=400&fit=crop&q=80',
+  'Cali': 'https://images.unsplash.com/photo-1587330979470-3585acb56371?w=600&h=400&fit=crop&q=80',
+  'Cartagena': 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600&h=400&fit=crop&q=80',
+  'Barranquilla': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=600&h=400&fit=crop&q=80',
+  'Bucaramanga': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=600&h=400&fit=crop&q=80',
+  'Pereira': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&q=80',
+  'Santa Marta': 'https://images.unsplash.com/photo-1539650116574-75c0c6d73a6e?w=600&h=400&fit=crop&q=80',
+  'Cúcuta': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&q=80',
+  'Ibagué': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&q=80'
 }
 
 export default function DestinationCard({ city, isPopular = false, onClick }) {
@@ -46,10 +46,18 @@ export default function DestinationCard({ city, isPopular = false, onClick }) {
           src={imageUrl} 
           alt={city}
           className="destination-card-image"
+          loading="lazy"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
           onError={(e) => {
             e.target.style.display = 'none'
-            if (e.target.nextSibling) {
-              e.target.nextSibling.style.display = 'flex'
+            const fallback = e.target.nextElementSibling
+            if (fallback) {
+              fallback.style.display = 'flex'
             }
           }}
         />

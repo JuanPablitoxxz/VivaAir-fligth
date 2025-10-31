@@ -120,19 +120,30 @@ export const Api = {
       query = query.eq('to_city', params.to)
       console.log('Filtering by to_city:', params.to)
     }
-    if (params.date) {
-      query = query.eq('date', params.date)
-      console.log('Filtering by date:', params.date)
+    
+    // Manejar fecha: si se especifica una fecha, filtrar por esa fecha específica
+    // Si no se especifica fecha, mostrar todos los vuelos futuros
+    const today = new Date().toISOString().split('T')[0]
+    if (params.date && params.date.trim() !== '') {
+      // Filtrar por fecha específica solo si es futura o hoy
+      if (params.date >= today) {
+        query = query.eq('date', params.date)
+        console.log('Filtering by specific date:', params.date)
+      } else {
+        // Si la fecha es pasada, no mostrar resultados
+        console.log('Date is in the past, returning empty results')
+        return []
+      }
+    } else {
+      // Sin fecha específica: mostrar todos los vuelos futuros (>= hoy)
+      query = query.gte('date', today)
+      console.log('No date specified, filtering by date >=', today)
     }
+    
     if (params.category) {
       query = query.eq('category', params.category)
       console.log('Filtering by category:', params.category)
     }
-    
-    // Solo vuelos futuros
-    const today = new Date().toISOString().split('T')[0]
-    query = query.gte('date', today)
-    console.log('Filtering by date >=', today)
     
     const { data, error } = await query
     

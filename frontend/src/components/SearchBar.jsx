@@ -22,10 +22,22 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
     
     setLoading(true)
     try {
+      // Limpiar fecha vacía para que la API no la use como filtro
+      const searchParams = {
+        from: params.from,
+        to: params.to,
+        passengers: params.passengers || 1
+      }
+      
+      // Solo incluir fecha si tiene un valor válido
+      if (params.date && params.date.trim() !== '') {
+        searchParams.date = params.date
+      }
+      
       if (showResultsInline && onResults) {
         // Modo inline (Dashboard/Cashier)
-        console.log('Searching with params:', params)
-        const res = await Api.searchFlights(params)
+        console.log('Searching with params:', searchParams)
+        const res = await Api.searchFlights(searchParams)
         console.log('Search results:', res)
         if (onResults) {
           onResults(res || [])
@@ -36,7 +48,7 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
         }
       } else {
         // Navegar a página de resultados con comparación
-        navigate('/results', { state: { searchParams: params } })
+        navigate('/results', { state: { searchParams: searchParams } })
       }
     } catch (err) {
       console.error('Error searching flights:', err)
@@ -78,7 +90,7 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
           </select>
         </div>
         <div>
-          <label className="label" style={{ color: 'rgba(255,255,255,0.9)' }}>Fecha</label>
+          <label className="label" style={{ color: 'rgba(255,255,255,0.9)' }}>Fecha (Opcional)</label>
           <input 
             className="input" 
             type="date" 
@@ -86,6 +98,7 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
             min={minDate}
             onChange={e => update('date', e.target.value)}
             style={{ background: 'white', color: 'var(--text)' }}
+            placeholder="Selecciona fecha (opcional)"
           />
         </div>
         <div>

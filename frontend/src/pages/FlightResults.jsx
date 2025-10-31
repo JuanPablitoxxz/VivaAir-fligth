@@ -14,6 +14,7 @@ function formatCOP(amount) {
 export default function FlightResults() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { isMobile, isSmallMobile } = useWindowSize()
   const searchParams = location.state?.searchParams || {}
   const [results, setResults] = useState([])
   const [groupedByAirline, setGroupedByAirline] = useState({})
@@ -133,15 +134,29 @@ export default function FlightResults() {
 
   if (loading) {
     return (
-      <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-        <p>Cargando vuelos...</p>
+      <div style={{ 
+        maxWidth: '1400px', 
+        margin: '0 auto', 
+        padding: isSmallMobile ? '12px' : isMobile ? '16px' : '24px', 
+        background: '#f8fafc', 
+        minHeight: '100vh' 
+      }}>
+        <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+          <p>Cargando vuelos...</p>
+        </div>
       </div>
     )
   }
 
   if (results.length === 0) {
     return (
-      <div>
+      <div style={{ 
+        maxWidth: '1400px', 
+        margin: '0 auto', 
+        padding: isSmallMobile ? '12px' : isMobile ? '16px' : '24px', 
+        background: '#f8fafc', 
+        minHeight: '100vh' 
+      }}>
         <div style={{ background: 'var(--bg-light)', paddingBottom: '40px' }}>
           <SearchBar onResults={() => {}} showResultsInline={false} />
         </div>
@@ -154,8 +169,6 @@ export default function FlightResults() {
       </div>
     )
   }
-
-  const { isMobile, isSmallMobile } = useWindowSize()
 
   return (
     <div style={{ 
@@ -199,7 +212,8 @@ export default function FlightResults() {
         marginBottom: '24px', 
         flexWrap: 'wrap', 
         alignItems: 'center',
-        flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+        flexDirection: isMobile ? 'column' : 'row',
+        width: '100%'
       }}>
         <button
           onClick={() => {
@@ -358,10 +372,10 @@ export default function FlightResults() {
           <div style={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
-            alignItems: window.innerWidth <= 768 ? 'flex-start' : 'center', 
+            alignItems: isMobile ? 'flex-start' : 'center', 
             marginTop: '24px',
-            flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
-            gap: window.innerWidth <= 768 ? '16px' : '0'
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '16px' : '0'
           }}>
             <div>
               <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '4px' }}>Final 1 persona</div>
@@ -416,30 +430,48 @@ export default function FlightResults() {
       )}
 
       {/* Lista de vuelos disponibles */}
-      <div style={{ background: 'white', borderRadius: '12px', padding: '24px' }}>
-        <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '20px', fontWeight: 700 }}>Todos los vuelos disponibles ({filteredFlights.length})</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {filteredFlights.map(flight => (
-            <div
-              key={flight.id}
-              onClick={() => setSelectedFlight(flight)}
-              style={{
-                padding: '16px',
-                border: selectedFlight?.id === flight.id ? '2px solid #9333ea' : '1px solid #e2e8f0',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                background: selectedFlight?.id === flight.id ? '#faf5ff' : 'white',
-                transition: 'all 0.2s'
-              }}
-            >
-              <FlightCard 
-                flight={flight} 
-                variant="list"
-                onSelect={() => setSelectedFlight(flight)}
-              />
-            </div>
-          ))}
-        </div>
+      <div style={{ 
+        background: 'white', 
+        borderRadius: '12px', 
+        padding: isMobile ? '16px' : '24px',
+        marginBottom: isMobile ? '16px' : '24px'
+      }}>
+        <h3 style={{ 
+          marginTop: 0, 
+          marginBottom: '20px', 
+          fontSize: isSmallMobile ? '18px' : '20px', 
+          fontWeight: 700 
+        }}>
+          Todos los vuelos disponibles ({filteredFlights.length})
+        </h3>
+        {filteredFlights.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <p style={{ color: 'var(--text-light)' }}>No hay vuelos disponibles con los filtros seleccionados</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {filteredFlights.map(flight => (
+              <div
+                key={flight.id}
+                onClick={() => setSelectedFlight(flight)}
+                style={{
+                  padding: isMobile ? '12px' : '16px',
+                  border: selectedFlight?.id === flight.id ? '2px solid #9333ea' : '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: selectedFlight?.id === flight.id ? '#faf5ff' : 'white',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <FlightCard 
+                  flight={flight} 
+                  variant="list"
+                  onSelect={() => setSelectedFlight(flight)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -1,23 +1,54 @@
 import { useState, useEffect } from 'react'
 
 export function useWindowSize() {
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
-    height: typeof window !== 'undefined' ? window.innerHeight : 800,
-  })
+  // Initialize with safe defaults that work for mobile
+  const getInitialSize = () => {
+    if (typeof window !== 'undefined') {
+      return {
+        width: window.innerWidth || 768,
+        height: window.innerHeight || 1024,
+      }
+    }
+    return { width: 768, height: 1024 } // Default to mobile size
+  }
+
+  const [windowSize, setWindowSize] = useState(getInitialSize)
 
   useEffect(() => {
-    function handleResize() {
+    // Set initial size immediately if window is available
+    if (typeof window !== 'undefined') {
       setWindowSize({
         width: window.innerWidth,
         height: window.innerHeight,
       })
     }
 
-    window.addEventListener('resize', handleResize)
-    handleResize()
+    function handleResize() {
+      if (typeof window !== 'undefined') {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        })
+      }
+    }
 
-    return () => window.removeEventListener('resize', handleResize)
+    // Use a small timeout to ensure window is ready on mobile devices
+    const timeoutId = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        handleResize()
+        window.addEventListener('resize', handleResize)
+        // Also listen for orientation changes on mobile
+        window.addEventListener('orientationchange', handleResize)
+      }
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', handleResize)
+        window.removeEventListener('orientationchange', handleResize)
+      }
+    }
   }, [])
 
   return {
@@ -29,4 +60,5 @@ export function useWindowSize() {
     isDesktop: windowSize.width > 1024
   }
 }
+
 

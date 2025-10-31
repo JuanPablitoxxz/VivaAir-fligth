@@ -17,7 +17,18 @@ const cityImages = {
 export default function DestinationCard({ city, isPopular = false, onClick }) {
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
-  const imageUrl = cityImages[city] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400'
+  const imageUrl = cityImages[city] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400&q=80'
+  
+  // Preload image
+  React.useEffect(() => {
+    const img = new Image()
+    img.onload = () => setImageLoaded(true)
+    img.onerror = () => {
+      console.error('Error preloading image for', city, ':', imageUrl)
+      setImageError(true)
+    }
+    img.src = imageUrl
+  }, [city, imageUrl])
   
   return (
     <div 
@@ -44,32 +55,32 @@ export default function DestinationCard({ city, isPopular = false, onClick }) {
         </div>
       )}
       <div className="destination-card-image-container">
-        {!imageError && (
-          <img 
-            src={imageUrl} 
-            alt={city}
-            className="destination-card-image"
-            loading="lazy"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: imageLoaded ? 'block' : 'none',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              zIndex: 2,
-              backgroundColor: 'var(--primary-light)'
-            }}
-            onLoad={(e) => {
-              setImageLoaded(true)
-            }}
-            onError={(e) => {
-              console.error('Error loading image for', city, ':', imageUrl)
-              setImageError(true)
-            }}
-          />
-        )}
+        <img 
+          src={imageUrl} 
+          alt={city}
+          className="destination-card-image"
+          loading="lazy"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: imageLoaded && !imageError ? 'block' : 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 2,
+            backgroundColor: 'var(--primary-light)'
+          }}
+          onLoad={(e) => {
+            setImageLoaded(true)
+            setImageError(false)
+          }}
+          onError={(e) => {
+            console.error('Error loading image for', city, ':', imageUrl)
+            setImageError(true)
+            setImageLoaded(false)
+          }}
+        />
         <div 
           className="destination-card-image-fallback" 
           style={{ 

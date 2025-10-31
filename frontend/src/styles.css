@@ -349,6 +349,7 @@ body{
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  display: block;
 }
 .destination-card-image{
   width: 100%;
@@ -356,6 +357,9 @@ body{
   object-fit: cover;
   transition: transform 0.3s;
   display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
 }
 .destination-card:hover .destination-card-image{
@@ -371,6 +375,13 @@ body{
   color: white;
   font-size: 48px;
   font-weight: 800;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+.destination-card-image-container img.loaded + .destination-card-image-fallback{
+  display: none;
 }
 .destination-card-content{
   padding: 20px;

@@ -22,18 +22,38 @@ export default function SearchBar({ onResults, showResultsInline = false }) {
     
     setLoading(true)
     try {
+      // Preparar parámetros de búsqueda
+      const searchParams = {
+        from: params.from,
+        to: params.to,
+        passengers: params.passengers || 1
+      }
+      
+      // Incluir fecha solo si tiene valor
+      if (params.date && params.date.trim() !== '') {
+        searchParams.date = params.date
+      }
+      
+      console.log('Buscando vuelos con parámetros:', searchParams)
+      
       if (showResultsInline && onResults) {
-        // Modo inline (Dashboard)
-        const res = await Api.searchFlights(params)
-        onResults(res)
-        window.scrollTo({ top: 600, behavior: 'smooth' })
+        // Modo inline (Dashboard/Cashier)
+        const res = await Api.searchFlights(searchParams)
+        console.log('Resultados de búsqueda:', res)
+        onResults(res || [])
+        if (window.location.pathname !== '/caja') {
+          window.scrollTo({ top: 600, behavior: 'smooth' })
+        }
       } else {
         // Navegar a página de resultados con comparación
-        navigate('/results', { state: { searchParams: params } })
+        navigate('/results', { state: { searchParams: searchParams } })
       }
     } catch (err) {
       console.error('Error searching flights:', err)
-      alert('Error al buscar vuelos')
+      alert('Error al buscar vuelos: ' + (err.message || 'Error desconocido'))
+      if (showResultsInline && onResults) {
+        onResults([])
+      }
     } finally {
       setLoading(false)
     }

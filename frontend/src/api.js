@@ -117,22 +117,32 @@ export const Api = {
     if (params.to) {
       query = query.eq('to_city', params.to)
     }
-    if (params.date) {
+    
+    // Manejar fecha: si se especifica, usar solo esa fecha. Si no, mostrar futuros.
+    const today = new Date().toISOString().split('T')[0]
+    if (params.date && params.date.trim() !== '') {
+      // Si se especifica una fecha, filtrar por esa fecha específica
       query = query.eq('date', params.date)
+    } else {
+      // Si no hay fecha, mostrar solo vuelos futuros
+      query = query.gte('date', today)
     }
+    
     if (params.category) {
       query = query.eq('category', params.category)
     }
     
-    // Solo vuelos futuros
-    query = query.gte('date', new Date().toISOString().split('T')[0])
-    
     const { data, error } = await query
     
-    if (error) throw error
+    if (error) {
+      console.error('Error en búsqueda de vuelos:', error)
+      throw error
+    }
+    
+    console.log(`Búsqueda: ${params.from || 'cualquiera'} → ${params.to || 'cualquiera'}, Fecha: ${params.date || 'futuros'}, Resultados: ${data?.length || 0}`)
     
     const nPassengers = Number(params.passengers || 1)
-    return data.map(f => ({
+    return (data || []).map(f => ({
       id: f.id,
       airline: f.airline,
       airline_id: f.airline_id,

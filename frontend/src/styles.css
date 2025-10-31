@@ -355,12 +355,8 @@ body{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  transition: transform 0.3s, opacity 0.3s;
+  opacity: 1;
 }
 .destination-card:hover .destination-card-image{
   transform: scale(1.05);
@@ -378,10 +374,6 @@ body{
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
-}
-.destination-card-image-container img.loaded + .destination-card-image-fallback{
-  display: none;
 }
 .destination-card-content{
   padding: 20px;

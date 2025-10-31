@@ -15,7 +15,9 @@ const cityImages = {
 }
 
 export default function DestinationCard({ city, isPopular = false, onClick }) {
-  const imageUrl = cityImages[city] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop'
+  const [imageLoaded, setImageLoaded] = React.useState(false)
+  const [imageError, setImageError] = React.useState(false)
+  const imageUrl = cityImages[city] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&h=400'
   
   return (
     <div 
@@ -42,37 +44,39 @@ export default function DestinationCard({ city, isPopular = false, onClick }) {
         </div>
       )}
       <div className="destination-card-image-container">
-        <img 
-          src={imageUrl} 
-          alt={city}
-          className="destination-card-image"
-          loading="lazy"
-          crossOrigin="anonymous"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-            backgroundColor: 'var(--primary-light)'
+        {!imageError && (
+          <img 
+            src={imageUrl} 
+            alt={city}
+            className="destination-card-image"
+            loading="lazy"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: imageLoaded ? 'block' : 'none',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              zIndex: 2,
+              backgroundColor: 'var(--primary-light)'
+            }}
+            onLoad={(e) => {
+              setImageLoaded(true)
+            }}
+            onError={(e) => {
+              console.error('Error loading image for', city, ':', imageUrl)
+              setImageError(true)
+            }}
+          />
+        )}
+        <div 
+          className="destination-card-image-fallback" 
+          style={{ 
+            display: imageLoaded && !imageError ? 'none' : 'flex',
+            zIndex: 1
           }}
-          onLoad={(e) => {
-            // Asegurar que la imagen se muestra cuando carga correctamente
-            e.target.style.display = 'block'
-            const fallback = e.target.nextElementSibling
-            if (fallback) {
-              fallback.style.display = 'none'
-            }
-          }}
-          onError={(e) => {
-            console.error('Error loading image for', city, ':', imageUrl)
-            e.target.style.display = 'none'
-            const fallback = e.target.nextElementSibling
-            if (fallback) {
-              fallback.style.display = 'flex'
-            }
-          }}
-        />
-        <div className="destination-card-image-fallback" style={{ display: 'flex' }}>
+        >
           {city.substring(0, 2).toUpperCase()}
         </div>
       </div>
